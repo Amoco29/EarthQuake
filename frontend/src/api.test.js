@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { chargerNiveau, ErreurApi } from './api.js'
+import { chargerMateriaux, chargerNiveau, chargerNiveaux, ErreurApi, simulerNiveau } from './api.js'
 
 const reponse = (status, corps, json = true) => ({
   ok: status >= 200 && status < 300,
@@ -57,5 +57,38 @@ describe('chargerNiveau', () => {
     await chargerNiveau('a/b', fetchSimule).catch(() => {})
 
     expect(fetchSimule).toHaveBeenCalledWith('http://localhost:8080/api/niveaux/a%2Fb')
+  })
+})
+
+describe('autres appels', () => {
+  it('liste les niveaux et les matériaux', async () => {
+    const fetchSimule = vi.fn().mockResolvedValue(reponse(200, []))
+
+    await chargerNiveaux(fetchSimule)
+    await chargerMateriaux(fetchSimule)
+
+    expect(fetchSimule).toHaveBeenNthCalledWith(1, 'http://localhost:8080/api/niveaux')
+    expect(fetchSimule).toHaveBeenNthCalledWith(2, 'http://localhost:8080/api/materiaux')
+  })
+
+  it('envoie les liens en POST JSON et renvoie le résultat', async () => {
+    const fetchSimule = vi.fn().mockResolvedValue(reponse(200, { estValide: true }))
+    const liens = [{ noeudDepartId: 1, noeudArriveeId: 4, materiauId: 'BOIS' }]
+
+    const resultat = await simulerNiveau(1, liens, fetchSimule)
+
+    const [url, options] = fetchSimule.mock.calls[0]
+    expect(url).toBe('http://localhost:8080/api/niveaux/1/simuler')
+    expect(options.method).toBe('POST')
+    expect(options.headers['Content-Type']).toBe('application/json')
+    expect(JSON.parse(options.body)).toEqual({ liens })
+    expect(resultat.estValide).toBe(true)
+  })
+
+  it('remonte le code d\'erreur d\'une simulation refusée', async () => {
+    const corps = { codeErreur: 'BUD-001', message: 'Budget dépassé' }
+    const fetchSimule = vi.fn().mockResolvedValue(reponse(400, corps))
+
+    await expect(simulerNiveau(1, [], fetchSimule)).rejects.toMatchObject({ status: 400, codeErreur: 'BUD-001' })
   })
 })

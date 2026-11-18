@@ -11,10 +11,11 @@ export class ErreurApi extends Error {
   }
 }
 
-export async function chargerNiveau(id, fetchImpl = fetch) {
+async function appeler(chemin, options, fetchImpl) {
   let reponse
   try {
-    reponse = await fetchImpl(`${URL_API}/api/niveaux/${encodeURIComponent(id)}`)
+    const url = `${URL_API}${chemin}`
+    reponse = await (options ? fetchImpl(url, options) : fetchImpl(url))
   } catch {
     throw new ErreurApi({
       message: `Backend injoignable sur ${URL_API} (lancé ? CORS refusé ?)`,
@@ -39,3 +40,21 @@ export async function chargerNiveau(id, fetchImpl = fetch) {
     message: corps?.message ?? `Réponse inattendue du backend (HTTP ${reponse.status})`,
   })
 }
+
+export const chargerNiveau = (id, fetchImpl = fetch) =>
+  appeler(`/api/niveaux/${encodeURIComponent(id)}`, null, fetchImpl)
+
+export const chargerNiveaux = (fetchImpl = fetch) => appeler('/api/niveaux', null, fetchImpl)
+
+export const chargerMateriaux = (fetchImpl = fetch) => appeler('/api/materiaux', null, fetchImpl)
+
+export const simulerNiveau = (id, liens, fetchImpl = fetch) =>
+  appeler(
+    `/api/niveaux/${encodeURIComponent(id)}/simuler`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ liens }),
+    },
+    fetchImpl,
+  )

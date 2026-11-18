@@ -16,3 +16,38 @@ export function metresVersPixels(posX, posY, niveau, echelle = PIXELS_PAR_METRE,
     y: marge + (niveau.hauteurZone - posY) * echelle,
   }
 }
+
+/** Nœud dont le centre est à moins de `rayon` pixels du point, le plus proche s'il y en a plusieurs. */
+export function noeudSous(px, py, niveau, rayon = 14) {
+  let meilleur = null
+  let distanceMin = rayon
+  for (const noeud of niveau.noeuds) {
+    const { x, y } = metresVersPixels(noeud.posX, noeud.posY, niveau)
+    const d = Math.hypot(px - x, py - y)
+    if (d <= distanceMin) {
+      meilleur = noeud
+      distanceMin = d
+    }
+  }
+  return meilleur
+}
+
+/** Lien dont le segment passe à moins de `seuil` pixels du point. */
+export function lienSous(px, py, liens, niveau, seuil = 7) {
+  const parId = Object.fromEntries(niveau.noeuds.map((n) => [n.id, n]))
+  let meilleur = null
+  let distanceMin = seuil
+  for (const lien of liens) {
+    const a = metresVersPixels(parId[lien.noeudDepartId].posX, parId[lien.noeudDepartId].posY, niveau)
+    const b = metresVersPixels(parId[lien.noeudArriveeId].posX, parId[lien.noeudArriveeId].posY, niveau)
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const t = Math.max(0, Math.min(1, ((px - a.x) * dx + (py - a.y) * dy) / (dx * dx + dy * dy)))
+    const d = Math.hypot(px - (a.x + t * dx), py - (a.y + t * dy))
+    if (d <= distanceMin) {
+      meilleur = lien
+      distanceMin = d
+    }
+  }
+  return meilleur
+}
