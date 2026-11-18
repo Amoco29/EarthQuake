@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chargerNiveau, simulerNiveau } from './api.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
+import { calculerEchelle, PIXELS_PAR_METRE } from './geometrie.js'
 import NiveauCanvas from './NiveauCanvas.jsx'
 import PanneauMateriaux from './PanneauMateriaux.jsx'
+import { useTaille } from './useTaille.js'
 
 export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVictoire, onChoisirNiveau }) {
   const [niveau, setNiveau] = useState(null)
@@ -14,6 +16,8 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const [animationFinie, setAnimationFinie] = useState(false)
   const [erreurSimulation, setErreurSimulation] = useState(null)
   const [enCours, setEnCours] = useState(false)
+  const [zone, setZone] = useState(null) // élément qui contient le canvas : sa taille donne l'échelle
+  const espace = useTaille(zone)
 
   useEffect(() => {
     let annule = false
@@ -32,6 +36,8 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const parId = useMemo(() => Object.fromEntries(materiaux.map((m) => [m.id, m])), [materiaux])
   const cout = niveau ? coutTotal(liens, niveau, parId) : 0
   const hauteur = niveau ? hauteurAtteinte(liens, niveau) : 0
+
+  const echelle = niveau && espace.hauteur > 0 ? calculerEchelle(niveau, espace) : PIXELS_PAR_METRE
 
   const finAnimation = useCallback(() => setAnimationFinie(true), [])
 
@@ -96,9 +102,10 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           onChoisir={setChoisi}
         />
 
-        <div className="zone-canvas">
+        <div className="zone-canvas" ref={setZone}>
           <NiveauCanvas
             niveau={niveau}
+            echelle={echelle}
             materiaux={parId}
             liens={liens}
             materiauChoisi={choisi}

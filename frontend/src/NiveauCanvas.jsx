@@ -7,16 +7,16 @@ import { dimensionsCanvas, lienSous, noeudSous } from './geometrie.js'
  * Canvas du niveau. En construction : glisser d'un nœud à un autre pose un lien du matériau choisi,
  * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin`.
  */
-export default function NiveauCanvas({ niveau, materiaux, liens, materiauChoisi, resultat, onLien, onSupprimer, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, onLien, onSupprimer, onFin }) {
   const ref = useRef(null)
   const [drag, setDrag] = useState(null)
-  const { largeur, hauteur } = dimensionsCanvas(niveau)
+  const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
 
   useEffect(() => {
     let annule = false
     let image = 0
     const ctx = ref.current.getContext('2d')
-    const scene = { niveau, materiaux, liens, drag, materiauChoisi, resultat }
+    const scene = { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat }
 
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
@@ -43,7 +43,7 @@ export default function NiveauCanvas({ niveau, materiaux, liens, materiauChoisi,
       annule = true
       cancelAnimationFrame(image)
     }
-  }, [niveau, materiaux, liens, drag, materiauChoisi, resultat, onFin])
+  }, [niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, onFin])
 
   function position(e) {
     const rect = ref.current.getBoundingClientRect()
@@ -56,13 +56,13 @@ export default function NiveauCanvas({ niveau, materiaux, liens, materiauChoisi,
   function enfoncer(e) {
     if (resultat) return
     const { x, y } = position(e)
-    const noeud = noeudSous(x, y, niveau)
+    const noeud = noeudSous(x, y, niveau, echelle)
     if (noeud) {
       ref.current.setPointerCapture(e.pointerId)
       setDrag({ departId: noeud.id, x, y })
       return
     }
-    const lien = lienSous(x, y, liens, niveau)
+    const lien = lienSous(x, y, liens, niveau, echelle)
     if (lien) onSupprimer(lien.noeudDepartId, lien.noeudArriveeId)
   }
 
@@ -73,7 +73,7 @@ export default function NiveauCanvas({ niveau, materiaux, liens, materiauChoisi,
   function relacher(e) {
     if (!drag) return
     const { x, y } = position(e)
-    const noeud = noeudSous(x, y, niveau)
+    const noeud = noeudSous(x, y, niveau, echelle)
     if (noeud && noeud.id !== drag.departId) onLien(drag.departId, noeud.id)
     setDrag(null)
   }
