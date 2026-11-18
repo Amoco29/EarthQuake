@@ -25,7 +25,7 @@ public class NiveauService {
 	}
 
 	// L'id arrive en texte pour décider nous-mêmes du code d'erreur (NIV-003) au lieu de laisser Spring répondre.
-	private static Long lireId(String idBrut) {
+	public static Long lireId(String idBrut) {
 		try {
 			return Long.valueOf(idBrut);
 		} catch (NumberFormatException e) {
