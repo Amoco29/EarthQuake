@@ -5,7 +5,7 @@ import { cleLien } from './construction.js'
 export const TAUX_EFFONDREMENT = 99
 
 export const EXPLICATION_SOLIDITE =
-  'Solidité : 100 moins la charge moyenne des liens. 100 = structure presque au repos, 0 = tous les liens au bord de la rupture.'
+  'Solidité : 100 moins la charge moyenne des liens. 100 = structure presque au repos, 0 = tous les liens au bord de la rupture. Un niveau perdu vaut 0.'
 
 /** Les liens qui ont cassé en premier (plus petit temps de rupture ; tous les ex æquo en cas d'effondrement). */
 export function premiersLiensCasses(details) {

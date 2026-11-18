@@ -53,7 +53,7 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 ## Décisions de conception (validées par Ilann)
 
 1. Moteur sismique : calcul statique côté Spring (`MoteurSismique`), pas de physique côté front. Charges par nœud (poids + poussée latérale proportionnelle à la masse), treillis à nœuds articulés résolu par la méthode des rigidités, séisme dans les deux sens (on garde le pire). Un lien casse quand son effort dépasse sa résistance. Pas de redistribution après rupture. Valeurs de jeu réglables : `FACTEUR_SISMIQUE` (`CalculateurCharges`), résistances et masses (`materiaux.json`), amortisseur (`CalculateurStress`).
-2. `ResultatSimulation` : `estValide`, `scoreSoliditeGlobal`, `messageBilan` et `detailsLiens` (liste de `ResultatLien` : ids, `tauxStress`, `estCasse`, `tempsRupture`). Score = 100 moins la moyenne des taux de stress (chacun plafonné à 1).
+2. `ResultatSimulation` : `estValide`, `scoreSoliditeGlobal`, `messageBilan` et `detailsLiens` (liste de `ResultatLien` : ids, `tauxStress`, `estCasse`, `tempsRupture`). Score = 100 moins la moyenne des taux de stress (chacun plafonné à 1) ; un niveau perdu vaut toujours 0.
 3. `Lien` est un record d'entrée immuable ; l'état de simulation vit dans `ResultatLien`.
 4. Matériaux pilotés par les données (`materiaux.json`), pas de hiérarchie de classes ; ids texte (`BOIS`, `BETON`, `ACIER`, `AMORTISSEUR`). Seul l'amortisseur a un comportement dédié (il retire 30 % de la poussée latérale sur les nœuds qu'il touche, 90 % au plus).
 5. Hauteur (`STR-004`), ancrage (`SIM-001`) et bilan contrôlent la connexité : seuls comptent les nœuds reliés au sol par un chemin de liens (intacts, pour le bilan).

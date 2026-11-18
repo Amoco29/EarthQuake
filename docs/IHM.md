@@ -138,7 +138,7 @@ JSON
 
 {
   "estValide": false,
-  "scoreSoliditeGlobal": 68.5,
+  "scoreSoliditeGlobal": 0.0,
   "messageBilan": "Échec : rupture détectée au 1er étage.",
   "detailsLiens": [
     { "noeudDepartId": 1, "noeudArriveeId": 4, "tauxStress": 0.45, "estCasse": false, "tempsRupture": null },
@@ -148,7 +148,7 @@ JSON
 
 ```
 
-`tempsRupture` est l'instant de la rupture en secondes (sur 10 s de séisme), `null` si le lien tient ; il sert à l'animation. Une structure qui casse est un résultat normal (200, `estValide: false`) ; une structure qui viole une règle de construction est une erreur (voir les codes ci-dessous).
+`tempsRupture` est l'instant de la rupture en secondes (sur 10 s de séisme), `null` si le lien tient ; il sert à l'animation. Une structure qui casse est un résultat normal (200, `estValide: false`) ; `scoreSoliditeGlobal` (0 à 100) vaut toujours 0 quand le niveau est perdu ; une structure qui viole une règle de construction est une erreur (voir les codes ci-dessous).
 
 ### **3\. Convention de Gestion des Erreurs**
 

@@ -61,8 +61,28 @@ class MoteurSismiqueTests {
 		ResultatSimulation resultat = moteur.simulerSeisme(niveau(), catalogue(0.01), tour());
 
 		assertThat(resultat.estValide()).isFalse();
+		assertThat(resultat.scoreSoliditeGlobal()).isZero();
 		assertThat(resultat.messageBilan()).contains("lien(s) sur 8");
 		assertThat(resultat.detailsLiens()).anyMatch(ResultatLien::estCasse);
+	}
+
+	@Test
+	void unNiveauPerduVautToujoursZeroMemeSiLaPlupartDesLiensTiennent() {
+		// un seul lien fragile casse, les autres sont loin de leur limite : le score reste 0 car le niveau est perdu
+		Map<String, Materiau> catalogue = Map.of(
+				"BOIS", new Materiau("BOIS", "Bois", "#8B5A2B", 10, 2, 1000, 1000, 1),
+				"FRAGILE", new Materiau("FRAGILE", "Fragile", "#CCCCCC", 10, 2, 0.001, 0.001, 1));
+		Niveau niveau = niveau();
+		niveau.autoriserMateriau("FRAGILE");
+		Structure structure = new Structure(List.of(
+				new Lien(1L, 3L, "BOIS"), new Lien(2L, 4L, "BOIS"), new Lien(3L, 4L, "BOIS"), new Lien(1L, 4L, "BOIS"),
+				new Lien(3L, 5L, "BOIS"), new Lien(4L, 6L, "BOIS"), new Lien(5L, 6L, "BOIS"), new Lien(3L, 6L, "FRAGILE")));
+
+		ResultatSimulation resultat = moteur.simulerSeisme(niveau, catalogue, structure);
+
+		assertThat(resultat.estValide()).isFalse();
+		assertThat(resultat.detailsLiens()).filteredOn(ResultatLien::estCasse).hasSizeLessThan(8);
+		assertThat(resultat.scoreSoliditeGlobal()).isZero();
 	}
 
 	@Test

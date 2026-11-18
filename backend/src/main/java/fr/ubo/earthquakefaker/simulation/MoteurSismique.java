@@ -44,18 +44,18 @@ public class MoteurSismique {
 
 	/**
 	 * Score de solidité (0 à 100) : 100 moins la moyenne des taux de stress, chaque taux plafonné à 1.
-	 * Tous les liens à vide donnent 100 ; tous au bord de la rupture, ou cassés, donnent 0.
+	 * Tous les liens à vide donnent 100 ; tous au bord de la rupture donnent 0. Un niveau perdu vaut toujours 0.
 	 */
 	private ResultatSimulation bilan(List<ResultatLien> details, double hauteurRestante, double hauteurRequise) {
 		double moyenne = details.stream().mapToDouble(r -> Math.min(r.tauxStress(), 1)).average().orElse(0);
-		double score = Math.round(100 * (1 - moyenne) * 10) / 10.0;
+		double scoreBrut = Math.round(100 * (1 - moyenne) * 10) / 10.0;
 		long casses = details.stream().filter(ResultatLien::estCasse).count();
 		double pire = details.stream().mapToDouble(ResultatLien::tauxStress).max().orElse(0);
 
 		// La hauteur ne compte que si elle tient pendant le séisme : on la mesure avec les liens intacts reliés au sol.
 		boolean hauteurTenue = hauteurRestante >= hauteurRequise;
 		if (casses == 0 && hauteurTenue) {
-			return new ResultatSimulation(true, score,
+			return new ResultatSimulation(true, scoreBrut,
 					"La structure a résisté au séisme. Lien le plus sollicité : %.0f %% de sa résistance.".formatted(pire * 100),
 					details);
 		}
@@ -74,7 +74,7 @@ public class MoteurSismique {
 		if (!hauteurTenue) {
 			message += " Il ne reste que %.1f m de structure reliée au sol sur %.1f m requis.".formatted(hauteurRestante, hauteurRequise);
 		}
-		return new ResultatSimulation(false, score, message, details);
+		return new ResultatSimulation(false, 0, message, details);
 	}
 
 	/** Hauteur du nœud le plus haut encore relié au sol par des liens qui n'ont pas cassé. */
