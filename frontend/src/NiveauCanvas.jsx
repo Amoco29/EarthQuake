@@ -1,67 +1,94 @@
-import { useEffect, useRef } from 'react'
-import { dimensionsCanvas, metresVersPixels } from './geometrie.js'
+import { useEffect, useRef, useState } from 'react'
+import { animationTerminee } from './animation.js'
+import { dessinerScene, POLICE } from './dessin.js'
+import { dimensionsCanvas, lienSous, noeudSous } from './geometrie.js'
 
-const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
-
-function dessiner(ctx, niveau) {
-  const { largeur, hauteur } = dimensionsCanvas(niveau)
-  ctx.clearRect(0, 0, largeur, hauteur)
-
-  // Zone de construction
-  const coin = metresVersPixels(0, niveau.hauteurZone, niveau)
-  const opposé = metresVersPixels(niveau.largeurZone, 0, niveau)
-  ctx.fillStyle = '#eef6ff'
-  ctx.fillRect(coin.x, coin.y, opposé.x - coin.x, opposé.y - coin.y)
-  ctx.strokeStyle = '#888'
-  ctx.strokeRect(coin.x, coin.y, opposé.x - coin.x, opposé.y - coin.y)
-
-  // Ligne de hauteur à atteindre
-  const gauche = metresVersPixels(0, niveau.hauteurMinRequise, niveau)
-  const droite = metresVersPixels(niveau.largeurZone, niveau.hauteurMinRequise, niveau)
-  ctx.strokeStyle = 'crimson'
-  ctx.setLineDash([6, 4])
-  ctx.beginPath()
-  ctx.moveTo(gauche.x, gauche.y)
-  ctx.lineTo(droite.x, droite.y)
-  ctx.stroke()
-  ctx.setLineDash([])
-  ctx.fillStyle = 'crimson'
-  ctx.font = POLICE
-  ctx.fillText(`${niveau.hauteurMinRequise} m`, gauche.x + 4, gauche.y - 4)
-
-  // Nœuds : cercle, ou triangle pour un ancrage au sol
-  for (const noeud of niveau.noeuds) {
-    const { x, y } = metresVersPixels(noeud.posX, noeud.posY, niveau)
-    ctx.fillStyle = noeud.estAncrageSol ? '#444' : '#1b6ec2'
-    ctx.beginPath()
-    if (noeud.estAncrageSol) {
-      ctx.moveTo(x, y - 9)
-      ctx.lineTo(x - 9, y + 7)
-      ctx.lineTo(x + 9, y + 7)
-      ctx.closePath()
-    } else {
-      ctx.arc(x, y, 7, 0, Math.PI * 2)
-    }
-    ctx.fill()
-  }
-}
-
-export default function NiveauCanvas({ niveau }) {
+/**
+ * Canvas du niveau. En construction : glisser d'un nœud à un autre pose un lien du matériau choisi,
+ * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin`.
+ */
+export default function NiveauCanvas({ niveau, materiaux, liens, materiauChoisi, resultat, onLien, onSupprimer, onFin }) {
   const ref = useRef(null)
+  const [drag, setDrag] = useState(null)
   const { largeur, hauteur } = dimensionsCanvas(niveau)
 
   useEffect(() => {
     let annule = false
+    let image = 0
     const ctx = ref.current.getContext('2d')
+    const scene = { niveau, materiaux, liens, drag, materiauChoisi, resultat }
+
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
     police.catch(() => {}).then(() => {
-      if (!annule) dessiner(ctx, niveau)
+      if (annule) return
+      if (!resultat) {
+        dessinerScene(ctx, { ...scene, temps: 0 })
+        return
+      }
+      const debut = performance.now()
+      const boucle = (maintenant) => {
+        if (annule) return
+        const temps = (maintenant - debut) / 1000
+        dessinerScene(ctx, { ...scene, temps })
+        if (animationTerminee(temps)) {
+          onFin?.()
+        } else {
+          image = requestAnimationFrame(boucle)
+        }
+      }
+      image = requestAnimationFrame(boucle)
     })
     return () => {
       annule = true
+      cancelAnimationFrame(image)
     }
-  }, [niveau])
+  }, [niveau, materiaux, liens, drag, materiauChoisi, resultat, onFin])
 
-  return <canvas ref={ref} width={largeur} height={hauteur} aria-label={`Niveau ${niveau.nom}`} />
+  function position(e) {
+    const rect = ref.current.getBoundingClientRect()
+    return {
+      x: ((e.clientX - rect.left) * largeur) / rect.width,
+      y: ((e.clientY - rect.top) * hauteur) / rect.height,
+    }
+  }
+
+  function enfoncer(e) {
+    if (resultat) return
+    const { x, y } = position(e)
+    const noeud = noeudSous(x, y, niveau)
+    if (noeud) {
+      ref.current.setPointerCapture(e.pointerId)
+      setDrag({ departId: noeud.id, x, y })
+      return
+    }
+    const lien = lienSous(x, y, liens, niveau)
+    if (lien) onSupprimer(lien.noeudDepartId, lien.noeudArriveeId)
+  }
+
+  function deplacer(e) {
+    if (drag) setDrag({ ...drag, ...position(e) })
+  }
+
+  function relacher(e) {
+    if (!drag) return
+    const { x, y } = position(e)
+    const noeud = noeudSous(x, y, niveau)
+    if (noeud && noeud.id !== drag.departId) onLien(drag.departId, noeud.id)
+    setDrag(null)
+  }
+
+  return (
+    <canvas
+      ref={ref}
+      width={largeur}
+      height={hauteur}
+      style={{ touchAction: 'none', maxWidth: '100%', cursor: resultat ? 'default' : 'crosshair' }}
+      aria-label={`Niveau ${niveau.nom}`}
+      onPointerDown={enfoncer}
+      onPointerMove={deplacer}
+      onPointerUp={relacher}
+      onPointerCancel={() => setDrag(null)}
+    />
+  )
 }
