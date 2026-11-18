@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
+import { ajouterLien, coutTotal, hauteurAtteinte, lienAutorise, supprimerLien } from './construction.js'
 
 // Ancrages 1 (0,0) et 2 (5,0) ; nœuds 3 (0,5), 4 (5,5), 5 (0,10) ; 6 (2,2) isolé.
 const niveau = {
@@ -61,5 +61,31 @@ describe('hauteurAtteinte', () => {
   it('vaut 0 sans lien ou sans ancrage relié', () => {
     expect(hauteurAtteinte([], niveau)).toBe(0)
     expect(hauteurAtteinte([lien(3, 5)], niveau)).toBe(0)
+  })
+})
+
+describe('lien trop long', () => {
+  // Nœuds 1 (0 ; 0) et 3 (0 ; 5) : 5 m. Nœud 4 (5 ; 5) : 7,07 m de 1.
+  const niveauLimite = { ...niveau, longueurMaxLien: 3.5355 }
+
+  it('accepte un lien dans la limite et refuse au-delà, avec un message lisible', () => {
+    expect(lienAutorise(1, 3, { ...niveau, longueurMaxLien: 5.5 }).ok).toBe(true)
+    const refus = lienAutorise(1, 3, niveauLimite)
+    expect(refus.ok).toBe(false)
+    expect(refus.longueur).toBe(5)
+    expect(refus.message).toBe('Lien trop long : 3,54 m maximum entre deux nœuds.')
+  })
+
+  it('n\'applique aucune limite sans longueurMaxLien', () => {
+    expect(lienAutorise(1, 4, niveau).ok).toBe(true)
+  })
+
+  it('ajouterLien refuse un lien trop long sans rien changer', () => {
+    const liens = [lien(1, 3)]
+    expect(ajouterLien(liens, 1, 4, 'BOIS', niveauLimite)).toBe(liens)
+  })
+
+  it('ajouterLien accepte un lien dans la limite', () => {
+    expect(ajouterLien([], 1, 3, 'BOIS', { ...niveau, longueurMaxLien: 5.5 })).toEqual([lien(1, 3)])
   })
 })

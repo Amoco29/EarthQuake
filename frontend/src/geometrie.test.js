@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculerEchelle, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous } from './geometrie.js'
+import { calculerEchelle, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres } from './geometrie.js'
 
 const niveau = { largeurZone: 5, hauteurZone: 10 }
 
@@ -93,5 +93,15 @@ describe('noeudSous et lienSous avec une autre échelle', () => {
     const liens = [{ noeudDepartId: 1, noeudArriveeId: 2, materiauId: 'BOIS' }]
     const milieu = metresVersPixels(3, 3, niveau, 80)
     expect(lienSous(milieu.x, milieu.y + 2, liens, niveau, 80)).toBe(liens[0])
+  })
+})
+
+describe('pixelsVersMetres', () => {
+  it('est l\'inverse de metresVersPixels', () => {
+    const niveau = { largeurZone: 5, hauteurZone: 10 }
+    const { x, y } = metresVersPixels(3.5, 7.25, niveau, 64)
+    const retour = pixelsVersMetres(x, y, niveau, 64)
+    expect(retour.x).toBeCloseTo(3.5)
+    expect(retour.y).toBeCloseTo(7.25)
   })
 })

@@ -17,6 +17,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const [animationFinie, setAnimationFinie] = useState(false)
   const [erreurSimulation, setErreurSimulation] = useState(null)
   const [enCours, setEnCours] = useState(false)
+  const [avertissement, setAvertissement] = useState(null) // ex : lien refusé car trop long
   const [zone, setZone] = useState(null) // élément qui contient le canvas : sa taille donne l'échelle
   const espace = useTaille(zone)
 
@@ -54,6 +55,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   }, [animationFinie, resultat, id, onVictoire])
 
   async function simuler() {
+    setAvertissement(null)
     setErreurSimulation(null)
     setEnCours(true)
     try {
@@ -119,8 +121,15 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             resultat={resultat}
             termine={animationFinie}
             surlignes={surlignes}
-            onLien={(a, b) => choisi && setLiens((l) => ajouterLien(l, a, b, choisi))}
-            onSupprimer={(a, b) => setLiens((l) => supprimerLien(l, a, b))}
+            onLien={(a, b) => {
+              setAvertissement(null)
+              if (choisi) setLiens((l) => ajouterLien(l, a, b, choisi, niveau))
+            }}
+            onRefus={setAvertissement}
+            onSupprimer={(a, b) => {
+              setAvertissement(null)
+              setLiens((l) => supprimerLien(l, a, b))
+            }}
             onFin={finAnimation}
           />
         </div>
@@ -137,6 +146,11 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             </div>
           )}
 
+          {avertissement && (
+            <p role="status" className="erreur">
+              {avertissement}
+            </p>
+          )}
           <MessageErreur erreur={erreurSimulation} />
 
           {resultat && animationFinie && (

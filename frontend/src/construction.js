@@ -7,9 +7,28 @@ export function indexerNoeuds(niveau) {
   return Object.fromEntries(niveau.noeuds.map((n) => [n.id, n]))
 }
 
-/** Ajoute un lien ; sur une paire déjà reliée, remplace le matériau ; ignore une boucle. */
-export function ajouterLien(liens, departId, arriveeId, materiauId) {
+/**
+ * Un lien ne relie que des nœuds voisins : longueur ≤ niveau.longueurMaxLien (règle STR-005 du backend, qui fait foi).
+ * Sans cette valeur (ancien backend), aucune limite n'est appliquée ici.
+ */
+export function lienAutorise(departId, arriveeId, niveau) {
+  const max = niveau.longueurMaxLien ?? Infinity
+  const noeuds = indexerNoeuds(niveau)
+  const a = noeuds[departId]
+  const b = noeuds[arriveeId]
+  const longueur = Math.hypot(a.posX - b.posX, a.posY - b.posY)
+  if (longueur <= max) return { ok: true, longueur, message: null }
+  const limite = max.toLocaleString('fr-FR', { maximumFractionDigits: 2 })
+  return { ok: false, longueur, message: `Lien trop long : ${limite} m maximum entre deux nœuds.` }
+}
+
+/**
+ * Ajoute un lien ; sur une paire déjà reliée, remplace le matériau ; ignore une boucle.
+ * Si `niveau` est fourni, refuse (sans rien changer) un lien trop long.
+ */
+export function ajouterLien(liens, departId, arriveeId, materiauId, niveau = null) {
   if (departId === arriveeId) return liens
+  if (niveau && !lienAutorise(departId, arriveeId, niveau).ok) return liens
   const cle = cleLien(departId, arriveeId)
   if (liens.some((l) => cleLien(l.noeudDepartId, l.noeudArriveeId) === cle)) {
     return liens.map((l) => (cleLien(l.noeudDepartId, l.noeudArriveeId) === cle ? { ...l, materiauId } : l))

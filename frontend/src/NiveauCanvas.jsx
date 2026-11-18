@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { animationTerminee, DUREE_ANIMATION } from './animation.js'
 import { dessinerScene, POLICE } from './dessin.js'
-import { dimensionsCanvas, lienSous, noeudSous } from './geometrie.js'
+import { lienAutorise } from './construction.js'
+import { dimensionsCanvas, lienSous, noeudSous, pixelsVersMetres } from './geometrie.js'
 
 /**
  * Canvas du niveau. En construction : glisser d'un nœud à un autre pose un lien du matériau choisi,
  * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
- * ensuite (`termine`), les liens `surlignes` clignotent.
+ * ensuite (`termine`), les liens `surlignes` clignotent. Un lien trop long est tracé en rouge et refusé (`onRefus`).
  */
-export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, termine, surlignes, onLien, onSupprimer, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onFin }) {
   const ref = useRef(null)
   const [drag, setDrag] = useState(null)
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
@@ -70,22 +71,37 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
     const noeud = noeudSous(x, y, niveau, echelle)
     if (noeud) {
       ref.current.setPointerCapture(e.pointerId)
-      setDrag({ departId: noeud.id, x, y })
+      setDrag({ departId: noeud.id, x, y, refuse: false })
       return
     }
     const lien = lienSous(x, y, liens, niveau, echelle)
     if (lien) onSupprimer(lien.noeudDepartId, lien.noeudArriveeId)
   }
 
+  /** Vrai si la cible du tracé (le nœud survolé, sinon le pointeur) est trop loin du nœud de départ. */
+  function tropLoin(departId, x, y) {
+    const cible = noeudSous(x, y, niveau, echelle)
+    const depart = niveau.noeuds.find((n) => n.id === departId)
+    if (cible) return cible.id !== departId && !lienAutorise(departId, cible.id, niveau).ok
+    const point = pixelsVersMetres(x, y, niveau, echelle)
+    return Math.hypot(point.x - depart.posX, point.y - depart.posY) > (niveau.longueurMaxLien ?? Infinity)
+  }
+
   function deplacer(e) {
-    if (drag) setDrag({ ...drag, ...position(e) })
+    if (!drag) return
+    const { x, y } = position(e)
+    setDrag({ ...drag, x, y, refuse: tropLoin(drag.departId, x, y) })
   }
 
   function relacher(e) {
     if (!drag) return
     const { x, y } = position(e)
     const noeud = noeudSous(x, y, niveau, echelle)
-    if (noeud && noeud.id !== drag.departId) onLien(drag.departId, noeud.id)
+    if (noeud && noeud.id !== drag.departId) {
+      const verdict = lienAutorise(drag.departId, noeud.id, niveau)
+      if (verdict.ok) onLien(drag.departId, noeud.id)
+      else onRefus?.(verdict.message)
+    }
     setDrag(null)
   }
 

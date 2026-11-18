@@ -28,6 +28,11 @@ export function metresVersPixels(posX, posY, niveau, echelle = PIXELS_PAR_METRE,
   }
 }
 
+/** Inverse de metresVersPixels : position en mètres d'un point du canvas. */
+export function pixelsVersMetres(px, py, niveau, echelle = PIXELS_PAR_METRE, marge = MARGE) {
+  return { x: (px - marge) / echelle, y: niveau.hauteurZone - (py - marge) / echelle }
+}
+
 /** Nœud dont le centre est à moins de `rayon` pixels du point, le plus proche s'il y en a plusieurs. */
 export function noeudSous(px, py, niveau, echelle = PIXELS_PAR_METRE, rayon = 14) {
   let meilleur = null

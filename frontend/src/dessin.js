@@ -89,8 +89,8 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, ma
   // Lien en cours de tracé
   if (drag) {
     const depart = pixels(noeuds[drag.departId], niveau, echelle)
-    ctx.strokeStyle = materiaux[materiauChoisi]?.couleurHex ?? '#000'
-    ctx.lineWidth = 3
+    ctx.strokeStyle = drag.refuse ? '#e60000' : (materiaux[materiauChoisi]?.couleurHex ?? '#000')
+    ctx.lineWidth = drag.refuse ? 5 : 3
     ctx.setLineDash([4, 4])
     ctx.beginPath()
     ctx.moveTo(depart.x, depart.y)
