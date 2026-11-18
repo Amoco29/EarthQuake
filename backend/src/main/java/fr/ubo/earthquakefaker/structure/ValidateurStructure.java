@@ -76,7 +76,7 @@ public class ValidateurStructure {
 	}
 
 	/** Les nœuds joignables depuis un ancrage au sol en suivant les liens (parcours en largeur). */
-	private static Set<Long> reliesAuSol(Map<Long, Noeud> noeuds, Map<Long, Set<Long>> voisins) {
+	public static Set<Long> reliesAuSol(Map<Long, Noeud> noeuds, Map<Long, Set<Long>> voisins) {
 		Set<Long> vus = new HashSet<>();
 		Deque<Long> file = new ArrayDeque<>();
 		for (Long id : voisins.keySet()) {
