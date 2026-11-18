@@ -1,8 +1,8 @@
-/* La police pokemon.ttf est fournie par Ilann dans public/fonts (ne pas la télécharger).
+/* La police pokemon.ttf est fournie par Ilann dans public/fonts/pokemon (ne pas la télécharger).
    Si le fichier est absent, le navigateur passe au repli suivant. */
 @font-face {
   font-family: 'Pokemon';
-  src: url('/fonts/pokemon.ttf') format('truetype');
+  src: url('/fonts/pokemon/Pokemon%20Solid.ttf') format('truetype');
   font-display: swap;
 }
 
