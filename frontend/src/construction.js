@@ -7,28 +7,40 @@ export function indexerNoeuds(niveau) {
   return Object.fromEntries(niveau.noeuds.map((n) => [n.id, n]))
 }
 
+const formater = (metres) => metres.toLocaleString('fr-FR', { maximumFractionDigits: 2 })
+
+/** Plus longue longueur permise : celle de la grille (STR-005) et celle du matériau (MAT-003), la plus courte des deux. */
+export function limiteLien(niveau, materiau = null) {
+  return Math.min(niveau.longueurMaxLien ?? Infinity, materiau?.longueurMax ?? Infinity)
+}
+
 /**
- * Un lien ne relie que des nœuds voisins : longueur ≤ niveau.longueurMaxLien (règle STR-005 du backend, qui fait foi).
- * Sans cette valeur (ancien backend), aucune limite n'est appliquée ici.
+ * Un lien ne relie que des nœuds voisins (STR-005) et ne dépasse pas la longueur de son matériau (MAT-003).
+ * Le backend fait foi : sans ces valeurs (ancien backend), aucune limite n'est appliquée ici.
  */
-export function lienAutorise(departId, arriveeId, niveau) {
-  const max = niveau.longueurMaxLien ?? Infinity
+export function lienAutorise(departId, arriveeId, niveau, materiau = null) {
   const noeuds = indexerNoeuds(niveau)
   const a = noeuds[departId]
   const b = noeuds[arriveeId]
   const longueur = Math.hypot(a.posX - b.posX, a.posY - b.posY)
-  if (longueur <= max) return { ok: true, longueur, message: null }
-  const limite = max.toLocaleString('fr-FR', { maximumFractionDigits: 2 })
-  return { ok: false, longueur, message: `Lien trop long : ${limite} m maximum entre deux nœuds.` }
+  const maxGrille = niveau.longueurMaxLien ?? Infinity
+  if (longueur > maxGrille) {
+    return { ok: false, longueur, message: `Lien trop long : ${formater(maxGrille)} m maximum entre deux nœuds.` }
+  }
+  const maxMateriau = materiau?.longueurMax ?? Infinity
+  if (longueur > maxMateriau + 1e-9) {
+    return { ok: false, longueur, message: `${materiau.nom} : ${formater(maxMateriau)} m maximum par lien.` }
+  }
+  return { ok: true, longueur, message: null }
 }
 
 /**
  * Ajoute un lien ; sur une paire déjà reliée, remplace le matériau ; ignore une boucle.
- * Si `niveau` est fourni, refuse (sans rien changer) un lien trop long.
+ * Si `niveau` est fourni, refuse (sans rien changer) un lien trop long pour la grille ou pour `materiau`.
  */
-export function ajouterLien(liens, departId, arriveeId, materiauId, niveau = null) {
+export function ajouterLien(liens, departId, arriveeId, materiauId, niveau = null, materiau = null) {
   if (departId === arriveeId) return liens
-  if (niveau && !lienAutorise(departId, arriveeId, niveau).ok) return liens
+  if (niveau && !lienAutorise(departId, arriveeId, niveau, materiau).ok) return liens
   const cle = cleLien(departId, arriveeId)
   if (liens.some((l) => cleLien(l.noeudDepartId, l.noeudArriveeId) === cle)) {
     return liens.map((l) => (cleLien(l.noeudDepartId, l.noeudArriveeId) === cle ? { ...l, materiauId } : l))

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ajouterLien, coutTotal, hauteurAtteinte, lienAutorise, supprimerLien } from './construction.js'
+import { ajouterLien, coutTotal, hauteurAtteinte, lienAutorise, limiteLien, supprimerLien } from './construction.js'
 
 // Ancrages 1 (0,0) et 2 (5,0) ; nœuds 3 (0,5), 4 (5,5), 5 (0,10) ; 6 (2,2) isolé.
 const niveau = {
@@ -87,5 +87,38 @@ describe('lien trop long', () => {
 
   it('ajouterLien accepte un lien dans la limite', () => {
     expect(ajouterLien([], 1, 3, 'BOIS', { ...niveau, longueurMaxLien: 5.5 })).toEqual([lien(1, 3)])
+  })
+})
+
+describe('longueur maximale du matériau', () => {
+  const niveauGrille = { ...niveau, longueurMaxLien: 6 }
+  const beton = { nom: 'Béton', longueurMax: 2.5 }
+  const bois = { nom: 'Bois', longueurMax: 5.5 }
+
+  it('limiteLien prend la plus courte des deux limites', () => {
+    expect(limiteLien(niveauGrille, beton)).toBe(2.5)
+    expect(limiteLien(niveauGrille, bois)).toBe(5.5)
+    expect(limiteLien(niveauGrille)).toBe(6)
+    expect(limiteLien(niveau, null)).toBe(Infinity)
+  })
+
+  it('refuse un lien trop long pour son matériau, avec le nom du matériau', () => {
+    const refus = lienAutorise(1, 3, niveauGrille, beton) // 5 m
+    expect(refus.ok).toBe(false)
+    expect(refus.message).toBe('Béton : 2,5 m maximum par lien.')
+  })
+
+  it('accepte un lien dans les deux limites', () => {
+    expect(lienAutorise(1, 3, niveauGrille, bois).ok).toBe(true)
+  })
+
+  it('donne la priorité à la limite de la grille', () => {
+    expect(lienAutorise(1, 3, { ...niveau, longueurMaxLien: 3 }, bois).message).toContain('entre deux nœuds')
+  })
+
+  it('ajouterLien refuse selon le matériau', () => {
+    const liens = []
+    expect(ajouterLien(liens, 1, 3, 'BETON', niveauGrille, beton)).toBe(liens)
+    expect(ajouterLien(liens, 1, 3, 'BOIS', niveauGrille, bois)).toHaveLength(1)
   })
 })

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { animationTerminee, DUREE_ANIMATION } from './animation.js'
 import { dessinerScene, POLICE } from './dessin.js'
-import { lienAutorise } from './construction.js'
+import { lienAutorise, limiteLien } from './construction.js'
 import { dimensionsCanvas, lienSous, noeudSous, pixelsVersMetres } from './geometrie.js'
 
 /**
@@ -87,9 +87,10 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
   function tropLoin(departId, x, y) {
     const cible = noeudSous(x, y, niveau, echelle)
     const depart = niveau.noeuds.find((n) => n.id === departId)
-    if (cible) return cible.id !== departId && !lienAutorise(departId, cible.id, niveau).ok
+    const materiau = materiaux[materiauChoisi]
+    if (cible) return cible.id !== departId && !lienAutorise(departId, cible.id, niveau, materiau).ok
     const point = pixelsVersMetres(x, y, niveau, echelle)
-    return Math.hypot(point.x - depart.posX, point.y - depart.posY) > (niveau.longueurMaxLien ?? Infinity)
+    return Math.hypot(point.x - depart.posX, point.y - depart.posY) > limiteLien(niveau, materiau)
   }
 
   function deplacer(e) {
@@ -103,7 +104,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
     const { x, y } = position(e)
     const noeud = noeudSous(x, y, niveau, echelle)
     if (noeud && noeud.id !== drag.departId) {
-      const verdict = lienAutorise(drag.departId, noeud.id, niveau)
+      const verdict = lienAutorise(drag.departId, noeud.id, niveau, materiaux[materiauChoisi])
       if (verdict.ok) onLien(drag.departId, noeud.id)
       else onRefus?.(verdict.message)
     }

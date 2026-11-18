@@ -12,7 +12,7 @@ Prérequis : Java 17+ et Node 18+.
 
 - **Carte :** choisir un niveau. Le niveau suivant s'ouvre quand le précédent est réussi (la progression est gardée en mémoire : elle se perd au rechargement de la page).
 - **Construire :** choisir un matériau dans le panneau, puis glisser d'un nœud à un autre pour poser un lien. Cliquer sur un lien le supprime. Les ancrages au sol sont les triangles ; la ligne rouge est la hauteur à atteindre. Budget et hauteur s'affichent en direct.
-- **Règles des liens :** un lien relie seulement des nœuds voisins (au plus la diagonale d'une cellule, ≈ 3,54 m) ; le tracé devient rouge et le dépôt est refusé au-delà. Un carré se déforme : ajoute des diagonales pour former des triangles.
+- **Règles des liens :** un lien relie seulement des nœuds voisins (au plus la diagonale d'une cellule, ≈ 3,54 m) ; chaque matériau a aussi sa longueur maximale (béton et amortisseur : 2,5 m, donc pas de diagonale). Le tracé devient rouge et le dépôt est refusé au-delà. Un carré se déforme : ajoute des diagonales pour former des triangles.
 - **Séisme :** « Lancer le séisme » envoie la structure au backend. L'écran tremble, les liens passent du vert au rouge selon leur stress, et un lien qui dépasse sa résistance casse.
 
 ## API
@@ -21,7 +21,7 @@ Prérequis : Java 17+ et Node 18+.
 |---|---|
 | `GET /api/niveaux` | liste des niveaux (carte) |
 | `GET /api/niveaux/{id}` | niveau, zone, nœuds et `longueurMaxLien` |
-| `GET /api/materiaux` | matériaux (couleur, coût, masse) |
+| `GET /api/materiaux` | matériaux (couleur, coût, masse, longueur max) |
 | `POST /api/niveaux/{id}/simuler` | simule le séisme sur `{ "liens": [...] }` |
 
 Les erreurs ont le format `{ timestamp, codeErreur, contexte, message }` (voir `CODES_ERREURS.md`). Console H2 : `http://localhost:8080/h2-console` (URL JDBC `jdbc:h2:mem:earthquakefaker`, utilisateur `sa`, mot de passe vide).

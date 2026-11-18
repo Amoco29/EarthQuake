@@ -15,7 +15,7 @@ export default function PanneauMateriaux({ materiaux, autorises, choisi, onChois
           >
             <span className="pastille" style={{ background: m.couleurHex }} />
             {m.nom}
-            <small>{libre ? `${m.coutUnitaire} / m` : 'verrouillé'}</small>
+            <small>{libre ? `${m.coutUnitaire} / m · max ${m.longueurMax} m` : 'verrouillé'}</small>
           </button>
         )
       })}

@@ -123,7 +123,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             surlignes={surlignes}
             onLien={(a, b) => {
               setAvertissement(null)
-              if (choisi) setLiens((l) => ajouterLien(l, a, b, choisi, niveau))
+              if (choisi) setLiens((l) => ajouterLien(l, a, b, choisi, niveau, parId[choisi]))
             }}
             onRefus={setAvertissement}
             onSupprimer={(a, b) => {
