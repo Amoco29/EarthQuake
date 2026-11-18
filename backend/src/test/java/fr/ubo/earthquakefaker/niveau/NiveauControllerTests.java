@@ -96,4 +96,15 @@ class NiveauControllerTests {
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.codeErreur").value("SYS-002"));
 	}
+
+	@Test
+	void listeLesNiveauxParNumeroPourLaCarte() throws Exception {
+		mvc.perform(get("/api/niveaux"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(3))
+				.andExpect(jsonPath("$[0].id").value(1))
+				.andExpect(jsonPath("$[0].nom").value("La prairie"))
+				.andExpect(jsonPath("$[2].numero").value(3))
+				.andExpect(jsonPath("$[0].noeuds").doesNotExist());
+	}
 }

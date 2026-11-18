@@ -1,5 +1,7 @@
 package fr.ubo.earthquakefaker.niveau;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,11 @@ public class NiveauController {
 
 	public NiveauController(NiveauService service) {
 		this.service = service;
+	}
+
+	@GetMapping
+	public List<NiveauResumeDto> lister() {
+		return service.lister();
 	}
 
 	@GetMapping("/{id}")

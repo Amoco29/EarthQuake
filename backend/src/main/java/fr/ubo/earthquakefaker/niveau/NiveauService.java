@@ -1,5 +1,8 @@
 package fr.ubo.earthquakefaker.niveau;
 
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,11 @@ public class NiveauService {
 		Niveau niveau = niveaux.findById(id)
 				.orElseThrow(() -> new ExceptionMetier(CodeErreur.NIV_001, "Le niveau " + id + " n'existe pas."));
 		return NiveauDto.de(niveau);
+	}
+
+	@Transactional(readOnly = true)
+	public List<NiveauResumeDto> lister() {
+		return niveaux.findAll().stream().sorted(Comparator.comparing(Niveau::getNumero)).map(NiveauResumeDto::de).toList();
 	}
 
 	// L'id arrive en texte pour décider nous-mêmes du code d'erreur (NIV-003) au lieu de laisser Spring répondre.
