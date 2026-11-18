@@ -1,5 +1,6 @@
 package fr.ubo.earthquakefaker.structure;
 
+import org.springframework.stereotype.Component;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import fr.ubo.earthquakefaker.niveau.Noeud;
  * le niveau et le catalogue de matériaux lui sont donnés. La première règle violée lève une {@link ExceptionMetier}.
  * Une pièce non reliée au sol n'est pas une erreur : elle est simplement ignorée pour la hauteur (CLAUDE.md, point 5).
  */
+@Component
 public class ValidateurStructure {
 
 	public void valider(Niveau niveau, Map<String, Materiau> catalogue, Structure structure) {

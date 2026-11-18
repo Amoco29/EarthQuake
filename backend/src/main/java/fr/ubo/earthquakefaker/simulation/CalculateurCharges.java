@@ -1,5 +1,6 @@
 package fr.ubo.earthquakefaker.simulation;
 
+import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import fr.ubo.earthquakefaker.structure.Structure;
  * Plus un nœud porte de matière, plus il est secoué : c'est ce qui rend les étages hauts et lourds risqués.
  * Suppose une structure déjà validée par {@code ValidateurStructure}.
  */
+@Component
 public class CalculateurCharges {
 
 	static final double GRAVITE = 9.81;

@@ -1,5 +1,6 @@
 package fr.ubo.earthquakefaker.simulation;
 
+import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import fr.ubo.earthquakefaker.structure.ValidateurStructure;
  * rupture. Une structure instable (un mécanisme, ex : un poteau seul sans contreventement) s'effondre en entier.
  * Les pièces non reliées au sol ne sont pas chargées : taux 0.
  */
+@Component
 public class CalculateurStress {
 
 	/** Les résistances de materiaux.json sont en kN : conversion en newtons. */
