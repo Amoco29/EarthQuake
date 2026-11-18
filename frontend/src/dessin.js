@@ -1,4 +1,4 @@
-import { couleurStress, estCasseA, secousse, tauxAffiche } from './animation.js'
+import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
 import { cleLien, indexerNoeuds } from './construction.js'
 import { dimensionsCanvas, metresVersPixels } from './geometrie.js'
 
@@ -22,15 +22,17 @@ function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur) {
   ctx.restore()
 }
 
-function dessinerLien(ctx, a, b, couleur, casse, largeur) {
-  if (!casse) {
-    dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur)
-    return
-  }
-  // Lien cassé : deux tronçons de chaque côté, avec un trou au milieu ; le second tronçon retombe un peu.
-  const decale = (p) => ({ x: p.x, y: p.y + 10 })
-  dessinerRectangle(ctx, a, b, 0, 0.35, couleur, largeur)
-  dessinerRectangle(ctx, decale(a), decale(b), 0.65, 1, couleur, largeur)
+/** Un lien cassé tombe en tournant autour de son centre (dy en mètres, angle en radians) et s'efface (alpha). */
+function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angle: 0, alpha: 1 }) {
+  if (etat.alpha <= 0) return
+  const centre = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  ctx.save()
+  ctx.globalAlpha = etat.alpha
+  ctx.translate(centre.x, centre.y + etat.dy * echelle)
+  ctx.rotate(etat.angle)
+  ctx.translate(-centre.x, -centre.y)
+  dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur)
+  ctx.restore()
 }
 
 /**
@@ -77,9 +79,10 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, ma
     const b = pixels(noeuds[lien.noeudArriveeId], niveau, echelle)
     const detail = details[cleLien(lien.noeudDepartId, lien.noeudArriveeId)]
     if (detail) {
-      dessinerLien(ctx, a, b, couleurStress(tauxAffiche(detail, temps)), estCasseA(detail, temps), largeurLien(echelle))
+      const etat = etatRupture(detail, temps)
+      dessinerLien(ctx, a, b, couleurStress(etat.casse ? 1 : tauxAffiche(detail, temps)), largeurLien(echelle), echelle, etat)
     } else {
-      dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', false, largeurLien(echelle))
+      dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', largeurLien(echelle), echelle)
     }
   }
 

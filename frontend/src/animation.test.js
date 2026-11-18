@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { animationTerminee, couleurStress, DUREE_ANIMATION, ECHELLE_TEMPS, estCasseA, MONTEE, secousse, tauxAffiche } from './animation.js'
+import { animationTerminee, CHUTE, couleurStress, DUREE_ANIMATION, ECHELLE_TEMPS, etatRupture, FONDU, MONTEE, secousse, tauxAffiche } from './animation.js'
 
 describe('couleurStress', () => {
   it('va du vert au rouge', () => {
@@ -23,15 +23,36 @@ describe('tauxAffiche', () => {
   })
 })
 
-describe('estCasseA', () => {
-  it('ne casse jamais un lien sans temps de rupture', () => {
-    expect(estCasseA({ tauxStress: 0.5, tempsRupture: null }, 100)).toBe(false)
+describe('etatRupture', () => {
+  const lien = { tauxStress: 2, tempsRupture: 5 }
+  const tCasse = 5 * ECHELLE_TEMPS
+
+  it('laisse intact un lien sans temps de rupture', () => {
+    expect(etatRupture({ tauxStress: 0.5, tempsRupture: null }, 100)).toEqual({ casse: false, dy: 0, angle: 0, alpha: 1 })
   })
 
-  it('casse au temps de rupture ramené à l\'échelle de l\'animation', () => {
-    const detail = { tauxStress: 2, tempsRupture: 5 }
-    expect(estCasseA(detail, 5 * ECHELLE_TEMPS - 0.01)).toBe(false)
-    expect(estCasseA(detail, 5 * ECHELLE_TEMPS)).toBe(true)
+  it('laisse le lien intact avant sa rupture', () => {
+    expect(etatRupture(lien, tCasse - 0.01)).toEqual({ casse: false, dy: 0, angle: 0, alpha: 1 })
+  })
+
+  it('le fait tomber en tournant, encore opaque, juste après la rupture', () => {
+    const etat = etatRupture(lien, tCasse + CHUTE / 2)
+    expect(etat.casse).toBe(true)
+    expect(etat.dy).toBeGreaterThan(0)
+    expect(etat.angle).toBeGreaterThan(0)
+    expect(etat.alpha).toBe(1)
+  })
+
+  it('l\'efface ensuite en fondu, puis il a disparu', () => {
+    const enFondu = etatRupture(lien, tCasse + CHUTE + FONDU / 2)
+    expect(enFondu.alpha).toBeCloseTo(0.5)
+    expect(etatRupture(lien, tCasse + CHUTE + FONDU + 1).alpha).toBe(0)
+  })
+
+  it('tombe de plus en plus bas sans jamais reculer', () => {
+    const dys = [0.1, 0.3, 0.6, 0.9, 5].map((d) => etatRupture(lien, tCasse + d).dy)
+    expect(dys).toEqual([...dys].sort((a, b) => a - b))
+    expect(dys.at(-1)).toBe(1)
   })
 })
 

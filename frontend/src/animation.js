@@ -18,8 +18,26 @@ export function tauxAffiche(detail, t) {
   return detail.tauxStress * clamp(t / MONTEE, 0, 1)
 }
 
-export function estCasseA(detail, t) {
-  return detail.tempsRupture != null && t >= detail.tempsRupture * ECHELLE_TEMPS
+/** Durée de la chute d'un lien cassé, puis de son fondu (secondes). */
+export const CHUTE = 0.5
+export const FONDU = 0.4
+
+/**
+ * Apparence d'un lien à l'instant t : intact, puis (à sa rupture) il tombe en tournant légèrement et s'efface en fondu.
+ * `dy` est en mètres vers le bas, `angle` en radians, `alpha` de 1 (opaque) à 0 (disparu).
+ */
+export function etatRupture(detail, t) {
+  const intact = { casse: false, dy: 0, angle: 0, alpha: 1 }
+  if (detail.tempsRupture == null) return intact
+  const ecoule = t - detail.tempsRupture * ECHELLE_TEMPS
+  if (ecoule < 0) return intact
+  const avancement = clamp(ecoule / (CHUTE + FONDU), 0, 1)
+  return {
+    casse: true,
+    dy: avancement * avancement,
+    angle: 0.35 * avancement,
+    alpha: ecoule < CHUTE ? 1 : clamp(1 - (ecoule - CHUTE) / FONDU, 0, 1),
+  }
 }
 
 export function animationTerminee(t) {
