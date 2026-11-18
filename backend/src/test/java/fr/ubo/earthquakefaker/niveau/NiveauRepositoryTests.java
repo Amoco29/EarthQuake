@@ -58,6 +58,19 @@ class NiveauRepositoryTests {
 	}
 
 	@Test
+	void conserveLesMateriauxAutorises() {
+		Niveau niveau = new Niveau(3L, 3, "Ville", "ville", 900, 9, 6, 5, 15);
+		niveau.ajouterNoeud(new Noeud(20L, 0, 0, true));
+		niveau.autoriserMateriau("BOIS");
+		niveau.autoriserMateriau("ACIER");
+		niveaux.save(niveau);
+		em.flush();
+		em.clear();
+
+		assertThat(niveaux.findById(3L).orElseThrow().getMateriauxAutorises()).containsExactlyInAnyOrder("BOIS", "ACIER");
+	}
+
+	@Test
 	void idInexistantRenvoieVide() {
 		assertThat(niveaux.findById(99L)).isEmpty();
 	}

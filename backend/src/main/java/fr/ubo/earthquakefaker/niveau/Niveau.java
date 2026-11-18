@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -29,6 +33,12 @@ public class Niveau {
 	@OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Noeud> noeuds = new ArrayList<>();
 
+	// Ids de matériaux (ex : "BOIS") : MAT-002 sera levé si le joueur en utilise un autre.
+	@ElementCollection
+	@CollectionTable(name = "niveau_materiau_autorise", joinColumns = @JoinColumn(name = "niveau_id"))
+	@Column(name = "materiau_id")
+	private List<String> materiauxAutorises = new ArrayList<>();
+
 	protected Niveau() {
 		// requis par JPA
 	}
@@ -49,6 +59,14 @@ public class Niveau {
 	public void ajouterNoeud(Noeud noeud) {
 		noeud.setNiveau(this);
 		noeuds.add(noeud);
+	}
+
+	public void autoriserMateriau(String materiauId) {
+		materiauxAutorises.add(materiauId);
+	}
+
+	public List<String> getMateriauxAutorises() {
+		return materiauxAutorises;
 	}
 
 	public Long getId() {
