@@ -1,44 +1,46 @@
 package fr.ubo.earthquakefaker.niveau;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.ubo.earthquakefaker.materiau.Materiau;
-import fr.ubo.earthquakefaker.materiau.MateriauRepository;
-import fr.ubo.earthquakefaker.niveau.VerificateurSolution.LienJson;
-import fr.ubo.earthquakefaker.niveau.VerificateurSolution.SolutionJson;
+import fr.ubo.earthquakefaker.simulation.ResultatLien;
+import fr.ubo.earthquakefaker.simulation.ResultatSimulation;
+import fr.ubo.earthquakefaker.simulation.ServiceSimulation;
+import fr.ubo.earthquakefaker.structure.Lien;
+import fr.ubo.earthquakefaker.structure.Structure;
 
 /**
- * Chaque niveau de niveaux.json a une solution de référence cohérente (règles de construction et budget).
- * La tenue au séisme de ces solutions sera vérifiée au jalon 2, avec le moteur.
+ * Chaque niveau de niveaux.json a une solution de référence, passée dans le vrai moteur sismique.
+ * Les règles de construction (budget, matériaux, ancrage, hauteur) sont celles de ValidateurStructure :
+ * une solution qui les viole fait échouer la simulation avec le code d'erreur correspondant.
  */
 @SpringBootTest
-@Transactional // Niveau.noeuds est LAZY
 class SolutionsReferenceTests {
+
+	record LienJson(Long noeudDepartId, Long noeudArriveeId, String materiauId) {
+	}
+
+	record SolutionJson(Long niveauId, String description, List<LienJson> liens) {
+	}
 
 	@Autowired
 	private NiveauRepository niveaux;
 
 	@Autowired
-	private MateriauRepository materiaux;
+	private ObjectMapper mapper;
 
 	@Autowired
-	private ObjectMapper mapper;
+	private ServiceSimulation simulation;
 
 	private List<SolutionJson> solutions() throws IOException {
 		try (InputStream flux = new ClassPathResource("solutions-reference.json").getInputStream()) {
@@ -47,19 +49,9 @@ class SolutionsReferenceTests {
 		}
 	}
 
-	private Map<String, Materiau> catalogue() {
-		return materiaux.findAll().stream().collect(Collectors.toMap(Materiau::getId, m -> m));
+	private static Structure structure(List<LienJson> liens) {
+		return new Structure(liens.stream().map(l -> new Lien(l.noeudDepartId(), l.noeudArriveeId(), l.materiauId())).toList());
 	}
-
-	private Niveau niveau(long id) {
-		return niveaux.findById(id).orElseThrow();
-	}
-
-	private List<LienJson> liensDe(long niveauId) throws IOException {
-		return solutions().stream().filter(s -> s.niveauId() == niveauId).findFirst().orElseThrow().liens();
-	}
-
-	// --- les solutions du jeu ---
 
 	@Test
 	void chaqueNiveauAUneSolutionDeReference() throws IOException {
@@ -70,83 +62,37 @@ class SolutionsReferenceTests {
 	}
 
 	@Test
-	void chaqueSolutionDeReferenceRespecteLesReglesDeConstruction() throws IOException {
-		Map<String, Materiau> catalogue = catalogue();
-
+	void chaqueSolutionDeReferenceResisteAuSeisme() throws IOException {
 		for (SolutionJson solution : solutions()) {
-			List<String> problemes = VerificateurSolution.verifier(niveau(solution.niveauId()), catalogue, solution.liens());
+			ResultatSimulation resultat = simulation.simuler(solution.niveauId(), structure(solution.liens()));
 
-			assertThat(problemes).as("niveau %d", solution.niveauId()).isEmpty();
+			assertThat(resultat.estValide()).as("niveau %d : %s", solution.niveauId(), resultat.messageBilan()).isTrue();
+			assertThat(resultat.detailsLiens()).hasSameSizeAs(solution.liens());
 		}
 	}
 
 	@Test
-	void lesCoutsDesSolutionsDeReferenceSontCeuxDocumentes() throws IOException {
-		Map<String, Materiau> catalogue = catalogue();
+	void lesSolutionsDeReferenceRestentAssezSerreesPourQueLeSeismeCompte() throws IOException {
+		// Le lien le plus sollicité d'une solution gagnante ne doit pas être quasi à vide : sinon le niveau est trop facile.
+		for (SolutionJson solution : solutions()) {
+			double pire = simulation.simuler(solution.niveauId(), structure(solution.liens())).detailsLiens().stream()
+					.mapToDouble(ResultatLien::tauxStress).max().orElseThrow();
 
-		assertThat(VerificateurSolution.cout(niveau(1), catalogue, liensDe(1))).isCloseTo(386.8, within(0.1));
-		assertThat(VerificateurSolution.cout(niveau(2), catalogue, liensDe(2))).isCloseTo(542.7, within(0.1));
-		assertThat(VerificateurSolution.cout(niveau(3), catalogue, liensDe(3))).isCloseTo(866.3, within(0.1));
-	}
-
-	// --- le contrôle échoue vraiment quand on casse une solution ---
-
-	private List<String> verifierAvec(long niveauId, java.util.function.UnaryOperator<List<LienJson>> modification)
-			throws IOException {
-		List<LienJson> liens = modification.apply(new ArrayList<>(liensDe(niveauId)));
-		return VerificateurSolution.verifier(niveau(niveauId), catalogue(), liens);
+			assertThat(pire).as("niveau %d", solution.niveauId()).isBetween(0.15, 1.0);
+		}
 	}
 
 	@Test
-	void detecteUneStructureVide() throws IOException {
-		assertThat(verifierAvec(1, l -> List.of())).anyMatch(p -> p.startsWith("STR-001"));
-	}
+	void sansSesDiagonalesChaqueSolutionSEffondre() throws IOException {
+		// Les diagonales sont les derniers liens de chaque solution : 2 au niveau 1, 3 au niveau 2, 4 au niveau 3.
+		for (SolutionJson solution : solutions()) {
+			int diagonales = solution.niveauId().intValue() % 100 + 1;
+			List<LienJson> sans = solution.liens().subList(0, solution.liens().size() - diagonales);
 
-	@Test
-	void detecteUnNoeudDUnAutreNiveau() throws IOException {
-		assertThat(verifierAvec(1, l -> {
-			l.add(new LienJson(1L, 101L, "BOIS"));
-			return l;
-		})).anyMatch(p -> p.startsWith("STR-002"));
-	}
+			ResultatSimulation resultat = simulation.simuler(solution.niveauId(), structure(sans));
 
-	@Test
-	void detecteUnLienEnDoubleEtUneBoucle() throws IOException {
-		assertThat(verifierAvec(1, l -> {
-			l.add(new LienJson(6L, 4L, "BOIS")); // même paire que 4-6, sens inverse
-			l.add(new LienJson(5L, 5L, "BOIS"));
-			return l;
-		})).anyMatch(p -> p.contains("lien en double")).anyMatch(p -> p.contains("vers lui-même"));
-	}
-
-	@Test
-	void detecteUnMateriauInconnuEtUnMateriauVerrouille() throws IOException {
-		assertThat(verifierAvec(1, l -> {
-			l.add(new LienJson(2L, 5L, "PLASTIQUE"));
-			l.add(new LienJson(5L, 8L, "AMORTISSEUR")); // verrouillé au niveau 1
-			return l;
-		})).anyMatch(p -> p.startsWith("MAT-001")).anyMatch(p -> p.startsWith("MAT-002"));
-	}
-
-	@Test
-	void detecteUnBudgetDepasse() throws IOException {
-		assertThat(verifierAvec(1, l -> {
-			l.add(new LienJson(2L, 5L, "ACIER")); // +100 : dépasse 400
-			return l;
-		})).anyMatch(p -> p.startsWith("BUD-001"));
-	}
-
-	@Test
-	void detecteUnePieceFlottante() throws IOException {
-		assertThat(verifierAvec(1, l -> {
-			l.add(new LienJson(10L, 11L, "BOIS")); // deux nœuds du haut reliés entre eux, pas au sol
-			return l;
-		})).anyMatch(p -> p.startsWith("pièce flottante"));
-	}
-
-	@Test
-	void detecteUneStructureTropBasseOuSansAncrage() throws IOException {
-		assertThat(verifierAvec(1, l -> List.of(new LienJson(1L, 4L, "BOIS")))).anyMatch(p -> p.startsWith("STR-004"));
-		assertThat(verifierAvec(1, l -> List.of(new LienJson(7L, 8L, "BOIS")))).anyMatch(p -> p.startsWith("SIM-001"));
+			assertThat(resultat.estValide()).as("niveau %d", solution.niveauId()).isFalse();
+			assertThat(resultat.messageBilan()).contains("effondrée");
+		}
 	}
 }
