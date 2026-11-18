@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1, "numero": 1, "nom": "Niveau cassé", "themeDecor": "prairie",
+    "budgetMax": 400, "hauteurMinRequise": 5, "magnitudeSeisme": 3,
+    "largeurZone": 5, "hauteurZone": 10,
+    "materiauxAutorises": ["BOIS"],
+    "noeuds": [
+      { "id": 1, "posX": 0, "posY": 0, "estAncrageSol": true },
+      { "id": 2, "posX": 7, "posY": 5, "estAncrageSol": false }
+    ]
+  }
+]

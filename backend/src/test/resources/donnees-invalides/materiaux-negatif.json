@@ -1,0 +1,7 @@
+[
+  {
+    "id": "BOIS", "nom": "Bois", "couleurHex": "#8B5A2B",
+    "coutUnitaire": -10, "masseLineique": 5,
+    "resistanceTractionMax": 20, "resistanceCompressionMax": 15, "moduleElasticite": 11
+  }
+]
