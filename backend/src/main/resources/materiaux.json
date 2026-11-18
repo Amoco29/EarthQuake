@@ -5,8 +5,8 @@
     "couleurHex": "#8B5A2B",
     "coutUnitaire": 10,
     "masseLineique": 5,
-    "resistanceTractionMax": 20,
-    "resistanceCompressionMax": 15,
+    "resistanceTractionMax": 5,
+    "resistanceCompressionMax": 3.75,
     "moduleElasticite": 11
   },
   {
@@ -15,8 +15,8 @@
     "couleurHex": "#9E9E9E",
     "coutUnitaire": 25,
     "masseLineique": 60,
-    "resistanceTractionMax": 5,
-    "resistanceCompressionMax": 50,
+    "resistanceTractionMax": 1.25,
+    "resistanceCompressionMax": 12.5,
     "moduleElasticite": 30
   },
   {
@@ -25,8 +25,8 @@
     "couleurHex": "#4A6FA5",
     "coutUnitaire": 40,
     "masseLineique": 30,
-    "resistanceTractionMax": 60,
-    "resistanceCompressionMax": 60,
+    "resistanceTractionMax": 15,
+    "resistanceCompressionMax": 15,
     "moduleElasticite": 200
   },
   {
@@ -35,8 +35,8 @@
     "couleurHex": "#E8A33D",
     "coutUnitaire": 60,
     "masseLineique": 15,
-    "resistanceTractionMax": 25,
-    "resistanceCompressionMax": 25,
+    "resistanceTractionMax": 6.25,
+    "resistanceCompressionMax": 6.25,
     "moduleElasticite": 2
   }
 ]
