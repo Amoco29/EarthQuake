@@ -33,6 +33,7 @@ class NiveauControllerTests {
 				.andExpect(jsonPath("$.hauteurMinRequise").value(5.0))
 				.andExpect(jsonPath("$.largeurZone").value(5.0))
 				.andExpect(jsonPath("$.hauteurZone").value(10.0))
+				.andExpect(jsonPath("$.longueurMaxLien").value(org.hamcrest.Matchers.closeTo(3.5355, 0.001)))
 				.andExpect(jsonPath("$.materiauxAutorises.length()").value(3))
 				.andExpect(jsonPath("$.noeuds.length()").value(12));
 	}
