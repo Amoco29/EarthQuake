@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chargerNiveau, simulerNiveau } from './api.js'
-import { phraseDuPremierLienCasse, premiersLiensCasses } from './bilan.js'
+import { EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
 import { calculerEchelle, PIXELS_PAR_METRE } from './geometrie.js'
@@ -146,9 +146,11 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
               {!resultat.estValide && phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId) && (
                 <p>{phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId)}</p>
               )}
-              <p>
+              {phraseMargeDeSecurite(resultat.detailsLiens) && <p>{phraseMargeDeSecurite(resultat.detailsLiens)}</p>}
+              <p title={EXPLICATION_SOLIDITE}>
                 Solidité : <span className="chiffre">{resultat.scoreSoliditeGlobal} / 100</span>
               </p>
+              <p className="explication">{EXPLICATION_SOLIDITE}</p>
               <div className="actions">
                 <button onClick={recommencer}>Modifier ma structure</button>
                 {resultat.estValide && suivantId && (
