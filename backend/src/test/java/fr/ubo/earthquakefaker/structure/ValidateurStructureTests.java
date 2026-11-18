@@ -26,6 +26,7 @@ class ValidateurStructureTests {
 	private final Map<String, Materiau> catalogue = Map.of(
 			"BOIS", new Materiau("BOIS", "Bois", "#8B5A2B", 10, 1, 1, 1, 1),
 			"ACIER", new Materiau("ACIER", "Acier", "#888888", 40, 1, 1, 1, 1),
+			"BETON", new Materiau("BETON", "Béton", "#9E9E9E", 25, 1, 1, 1, 1, 2.5),
 			"AMORTISSEUR", new Materiau("AMORTISSEUR", "Amortisseur", "#00AA00", 60, 1, 1, 1, 1));
 
 	private Niveau niveau() {
@@ -38,6 +39,7 @@ class ValidateurStructureTests {
 		niveau.ajouterNoeud(new Noeud(6L, 2.5, 5, false));
 		niveau.autoriserMateriau("BOIS");
 		niveau.autoriserMateriau("ACIER");
+		niveau.autoriserMateriau("BETON");
 		return niveau;
 	}
 
@@ -118,6 +120,18 @@ class ValidateurStructureTests {
 	void refuseUnMateriauInconnu() {
 		assertCode(structure(new Lien(1L, 3L, "PLASTIQUE")), CodeErreur.MAT_001);
 		assertCode(structure(new Lien(1L, 3L, null)), CodeErreur.MAT_001);
+	}
+
+	@Test
+	void refuseUnLienPlusLongQueLaLimiteDuMateriau() {
+		// la diagonale 1-4 (3,54 m) est permise par la grille mais pas en béton (2,5 m maximum)
+		assertCode(structure(new Lien(1L, 4L, "BETON")), CodeErreur.MAT_003);
+	}
+
+	@Test
+	void accepteLeBetonSurUnLienDeLaLongueurMaximale() {
+		assertThatCode(() -> validateur.valider(niveau(), catalogue,
+				structure(new Lien(1L, 3L, "BETON"), new Lien(3L, 5L, "BOIS")))).doesNotThrowAnyException();
 	}
 
 	@Test

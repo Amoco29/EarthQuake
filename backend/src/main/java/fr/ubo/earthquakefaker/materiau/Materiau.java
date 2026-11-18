@@ -20,13 +20,21 @@ public class Materiau {
 	private double resistanceTractionMax;
 	private double resistanceCompressionMax;
 	private double moduleElasticite;
+	private double longueurMax; // en mètres : un lien de ce matériau ne peut pas être plus long
 
 	protected Materiau() {
 		// requis par JPA
 	}
 
+	/** Matériau sans limite de longueur (pratique pour les tests qui n'en ont pas besoin). */
 	public Materiau(String id, String nom, String couleurHex, double coutUnitaire, double masseLineique,
 			double resistanceTractionMax, double resistanceCompressionMax, double moduleElasticite) {
+		this(id, nom, couleurHex, coutUnitaire, masseLineique, resistanceTractionMax, resistanceCompressionMax,
+				moduleElasticite, Double.MAX_VALUE);
+	}
+
+	public Materiau(String id, String nom, String couleurHex, double coutUnitaire, double masseLineique,
+			double resistanceTractionMax, double resistanceCompressionMax, double moduleElasticite, double longueurMax) {
 		this.id = id;
 		this.nom = nom;
 		this.couleurHex = couleurHex;
@@ -35,6 +43,7 @@ public class Materiau {
 		this.resistanceTractionMax = resistanceTractionMax;
 		this.resistanceCompressionMax = resistanceCompressionMax;
 		this.moduleElasticite = moduleElasticite;
+		this.longueurMax = longueurMax;
 	}
 
 	public String getId() {
@@ -67,5 +76,9 @@ public class Materiau {
 
 	public double getModuleElasticite() {
 		return moduleElasticite;
+	}
+
+	public double getLongueurMax() {
+		return longueurMax;
 	}
 }

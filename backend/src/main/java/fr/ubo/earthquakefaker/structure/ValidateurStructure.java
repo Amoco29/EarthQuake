@@ -67,6 +67,10 @@ public class ValidateurStructure {
 				throw new ExceptionMetier(CodeErreur.MAT_002,
 						"Le matériau " + materiau.getId() + " n'est pas autorisé au niveau " + niveau.getNumero() + ".");
 			}
+			if (longueurLien > materiau.getLongueurMax() + 1e-9) {
+				throw new ExceptionMetier(CodeErreur.MAT_003, "Le lien %d-%d mesure %.2f m : le matériau %s est limité à %.2f m par lien."
+						.formatted(depart.getId(), arrivee.getId(), longueurLien, materiau.getNom(), materiau.getLongueurMax()));
+			}
 			cout += materiau.getCoutUnitaire() * longueurLien;
 			voisins.computeIfAbsent(depart.getId(), k -> new HashSet<>()).add(arrivee.getId());
 			voisins.computeIfAbsent(arrivee.getId(), k -> new HashSet<>()).add(depart.getId());

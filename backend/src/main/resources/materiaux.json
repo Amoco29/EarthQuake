@@ -7,7 +7,8 @@
     "masseLineique": 5,
     "resistanceTractionMax": 5,
     "resistanceCompressionMax": 3.75,
-    "moduleElasticite": 11
+    "moduleElasticite": 11,
+    "longueurMax": 3.54
   },
   {
     "id": "BETON",
@@ -17,7 +18,8 @@
     "masseLineique": 60,
     "resistanceTractionMax": 1.25,
     "resistanceCompressionMax": 12.5,
-    "moduleElasticite": 30
+    "moduleElasticite": 30,
+    "longueurMax": 2.5
   },
   {
     "id": "ACIER",
@@ -27,7 +29,8 @@
     "masseLineique": 30,
     "resistanceTractionMax": 15,
     "resistanceCompressionMax": 15,
-    "moduleElasticite": 200
+    "moduleElasticite": 200,
+    "longueurMax": 3.54
   },
   {
     "id": "AMORTISSEUR",
@@ -37,6 +40,7 @@
     "masseLineique": 15,
     "resistanceTractionMax": 6.25,
     "resistanceCompressionMax": 6.25,
-    "moduleElasticite": 2
+    "moduleElasticite": 2,
+    "longueurMax": 2.5
   }
 ]

@@ -21,7 +21,7 @@ class LecteurMateriauxTests {
 	private static String materiau(String id, String couleur, String cout) {
 		return """
 				{ "id": "%s", "nom": "Test", "couleurHex": "%s", "coutUnitaire": %s, "masseLineique": 5,
-				  "resistanceTractionMax": 20, "resistanceCompressionMax": 15, "moduleElasticite": 11 }
+				  "resistanceTractionMax": 20, "resistanceCompressionMax": 15, "moduleElasticite": 11, "longueurMax": 3 }
 				""".formatted(id, couleur, cout);
 	}
 
@@ -43,6 +43,18 @@ class LecteurMateriauxTests {
 		assertThat(lus).extracting(Materiau::getId).containsExactly("BOIS", "ACIER");
 		assertThat(lus.get(0).getCoutUnitaire()).isEqualTo(10);
 		assertThat(lus.get(0).getCouleurHex()).isEqualTo("#8B5A2B");
+	}
+
+	@Test
+	void litLaLongueurMaximale() {
+		assertThat(lire("[" + materiau("BOIS", "#8B5A2B", "10") + "]").get(0).getLongueurMax()).isEqualTo(3);
+	}
+
+	@Test
+	void rejetteUneLongueurMaximaleAbsenteOuNonPositive() {
+		String sans = materiau("BOIS", "#8B5A2B", "10").replace(", \"longueurMax\": 3", "");
+		assertRejete("[" + sans + "]", "longueurMax manquant");
+		assertRejete("[" + materiau("BOIS", "#8B5A2B", "10").replace("\"longueurMax\": 3", "\"longueurMax\": 0") + "]", "longueurMax doit être strictement positif");
 	}
 
 	@Test
@@ -75,7 +87,7 @@ class LecteurMateriauxTests {
 	void rejetteUnChampManquant() {
 		String sansMasse = """
 				[ { "id": "BOIS", "nom": "Bois", "couleurHex": "#8B5A2B", "coutUnitaire": 10,
-				    "resistanceTractionMax": 20, "resistanceCompressionMax": 15, "moduleElasticite": 11 } ]
+				    "resistanceTractionMax": 20, "resistanceCompressionMax": 15, "moduleElasticite": 11, "longueurMax": 3 } ]
 				""";
 		assertRejete(sansMasse, "masseLineique manquant");
 	}

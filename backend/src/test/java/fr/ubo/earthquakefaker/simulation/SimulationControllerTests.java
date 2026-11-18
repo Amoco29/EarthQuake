@@ -76,6 +76,13 @@ class SimulationControllerTests {
 	}
 
 	@Test
+	void uneDiagonaleEnBetonDonneMat003() throws Exception {
+		// 1 (0 ; 0) à 5 (2,5 ; 2,5) : 3,54 m, au-delà des 2,5 m du béton
+		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":5,\"materiauId\":\"BETON\"}]}"))
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("MAT-003"));
+	}
+
+	@Test
 	void unLienQuiTraverseUnNoeudDonneStr006() throws Exception {
 		// 1 (0 ; 0) à 7 (0 ; 5) passe sur le nœud 4 (0 ; 2,5)
 		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":7,\"materiauId\":\"BOIS\"}]}"))

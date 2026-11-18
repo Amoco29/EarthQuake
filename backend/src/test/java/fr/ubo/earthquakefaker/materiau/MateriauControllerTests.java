@@ -25,7 +25,9 @@ class MateriauControllerTests {
 				.andExpect(jsonPath("$[0].id").value("BOIS"))
 				.andExpect(jsonPath("$[0].couleurHex").value("#8B5A2B"))
 				.andExpect(jsonPath("$[0].coutUnitaire").value(10.0))
-				.andExpect(jsonPath("$[3].id").value("AMORTISSEUR"));
+				.andExpect(jsonPath("$[3].id").value("AMORTISSEUR"))
+				.andExpect(jsonPath("$[0].longueurMax").value(3.54))
+				.andExpect(jsonPath("$[1].longueurMax").value(2.5));
 	}
 
 	@Test

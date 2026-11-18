@@ -34,6 +34,7 @@ Le catalogue est dans `backend/.../erreur/CodeErreur.java` : tout code ajouté l
 | :--- | :--- | :--- | :--- | :--- |
 | **MAT-001** | 400 | Matériau inconnu | L'identifiant du matériau envoyé par React n'existe pas dans le système. | levé par `POST /api/niveaux/{id}/simuler` |
 | **MAT-002** | 400 | Matériau verrouillé | Le joueur tente d'utiliser un matériau non autorisé dans ce niveau (ex : Amortisseur au niveau 1). | levé par `POST /api/niveaux/{id}/simuler` |
+| **MAT-003** | 400 | Lien trop long pour ce matériau | Le lien dépasse la longueur maximale du matériau (`longueurMax` dans `materiaux.json`) : par exemple une diagonale en béton (2,5 m maximum). | levé par `POST /api/niveaux/{id}/simuler` |
 
 ## 5. Contexte `SIM` (Moteur Sismique)
 | Code | HTTP | Signification | Cause fréquente | État |

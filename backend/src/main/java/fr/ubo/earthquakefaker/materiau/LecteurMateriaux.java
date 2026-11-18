@@ -21,7 +21,7 @@ public class LecteurMateriaux {
 
 	// Doubles (et non double) : un champ absent donne null, qu'on peut signaler, au lieu d'un 0 silencieux.
 	private record MateriauJson(String id, String nom, String couleurHex, Double coutUnitaire, Double masseLineique,
-			Double resistanceTractionMax, Double resistanceCompressionMax, Double moduleElasticite) {
+			Double resistanceTractionMax, Double resistanceCompressionMax, Double moduleElasticite, Double longueurMax) {
 	}
 
 	private final ObjectMapper mapper;
@@ -48,7 +48,7 @@ public class LecteurMateriaux {
 		for (MateriauJson m : bruts) {
 			valider(m, ids);
 			materiaux.add(new Materiau(m.id(), m.nom(), m.couleurHex(), m.coutUnitaire(), m.masseLineique(),
-					m.resistanceTractionMax(), m.resistanceCompressionMax(), m.moduleElasticite()));
+					m.resistanceTractionMax(), m.resistanceCompressionMax(), m.moduleElasticite(), m.longueurMax()));
 		}
 		return materiaux;
 	}
@@ -71,6 +71,7 @@ public class LecteurMateriaux {
 		exigerPositif(m.id(), "resistanceTractionMax", m.resistanceTractionMax());
 		exigerPositif(m.id(), "resistanceCompressionMax", m.resistanceCompressionMax());
 		exigerPositif(m.id(), "moduleElasticite", m.moduleElasticite());
+		exigerPositif(m.id(), "longueurMax", m.longueurMax());
 	}
 
 	private void exigerPositif(String id, String champ, Double valeur) {

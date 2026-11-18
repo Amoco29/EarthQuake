@@ -24,6 +24,7 @@ public enum CodeErreur {
 
 	MAT_001("MAT-001", "Validation des matériaux", HttpStatus.BAD_REQUEST),
 	MAT_002("MAT-002", "Validation des matériaux", HttpStatus.BAD_REQUEST),
+	MAT_003("MAT-003", "Validation des matériaux", HttpStatus.BAD_REQUEST),
 
 	SIM_001("SIM-001", "Simulation sismique", HttpStatus.UNPROCESSABLE_ENTITY),
 
