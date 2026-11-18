@@ -17,26 +17,26 @@ Le catalogue est dans `backend/.../erreur/CodeErreur.java` : tout code ajouté l
 ## 2. Contexte `STR` (Structure & Géométrie)
 | Code | HTTP | Signification | Cause fréquente | État |
 | :--- | :--- | :--- | :--- | :--- |
-| **STR-001** | 400 | Structure vide | Le joueur a lancé la simulation sans poser aucun lien. | défini, pas encore levé |
-| **STR-002** | 400 | Nœud invalide | Un lien référence un ID de nœud qui n'appartient pas au niveau courant. | défini, pas encore levé |
-| **STR-003** | 400 | Lien identique / boucle | Le nœud de départ et d'arrivée sont identiques, ou deux liens sont superposés. | défini, pas encore levé |
-| **STR-004** | 400 | Hauteur minimale non atteinte | Aucun nœud relié au sol n'atteint la hauteur requise par le niveau. | défini, pas encore levé |
+| **STR-001** | 400 | Structure vide | Le joueur a lancé la simulation sans poser aucun lien. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
+| **STR-002** | 400 | Nœud invalide | Un lien référence un ID de nœud qui n'appartient pas au niveau courant. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
+| **STR-003** | 400 | Lien identique / boucle | Le nœud de départ et d'arrivée sont identiques, ou deux liens sont superposés. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
+| **STR-004** | 400 | Hauteur minimale non atteinte | Aucun nœud relié au sol n'atteint la hauteur requise par le niveau. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
 
 ## 3. Contexte `BUD` (Budget)
 | Code | HTTP | Signification | Cause fréquente | État |
 | :--- | :--- | :--- | :--- | :--- |
-| **BUD-001** | 400 | Budget dépassé | La somme des coûts des liens posés est supérieure au `budgetMax` du niveau. | défini, pas encore levé |
+| **BUD-001** | 400 | Budget dépassé | La somme des coûts des liens posés est supérieure au `budgetMax` du niveau. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
 
 ## 4. Contexte `MAT` (Matériaux)
 | Code | HTTP | Signification | Cause fréquente | État |
 | :--- | :--- | :--- | :--- | :--- |
-| **MAT-001** | 400 | Matériau inconnu | L'identifiant du matériau envoyé par React n'existe pas dans le système. | défini, pas encore levé |
-| **MAT-002** | 400 | Matériau verrouillé | Le joueur tente d'utiliser un matériau non autorisé dans ce niveau (ex : Amortisseur au niveau 1). | défini, pas encore levé |
+| **MAT-001** | 400 | Matériau inconnu | L'identifiant du matériau envoyé par React n'existe pas dans le système. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
+| **MAT-002** | 400 | Matériau verrouillé | Le joueur tente d'utiliser un matériau non autorisé dans ce niveau (ex : Amortisseur au niveau 1). | levé par `ValidateurStructure` (pas encore exposé par l'API) |
 
 ## 5. Contexte `SIM` (Moteur Sismique)
 | Code | HTTP | Signification | Cause fréquente | État |
 | :--- | :--- | :--- | :--- | :--- |
-| **SIM-001** | 422 | Aucun ancrage au sol | La structure n'est reliée à aucun nœud ayant `estAncrageSol = true`. | défini, pas encore levé |
+| **SIM-001** | 422 | Aucun ancrage au sol | La structure n'est reliée à aucun nœud ayant `estAncrageSol = true`. | levé par `ValidateurStructure` (pas encore exposé par l'API) |
 
 ## 6. Contexte `SYS` (Technique)
 | Code | HTTP | Signification | Cause fréquente | État |
