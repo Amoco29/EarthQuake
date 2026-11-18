@@ -18,7 +18,8 @@ import fr.ubo.earthquakefaker.niveau.Noeud;
 /**
  * Règles de construction d'une structure, avant toute simulation. Classe pure : pas d'accès à la base,
  * le niveau et le catalogue de matériaux lui sont donnés. La première règle violée lève une {@link ExceptionMetier}.
- * Un lien ne relie que des nœuds voisins (STR-005). Une pièce non reliée au sol n'est pas une erreur : elle est simplement ignorée pour la hauteur (CLAUDE.md, point 5).
+ * Un lien ne relie que des nœuds voisins (STR-005) et ne passe sur aucun autre nœud (STR-006, contrôlé en premier :
+ * c'est le cas le plus précis, et il couvre aussi les liens qui se superposent en partie). Une pièce non reliée au sol n'est pas une erreur : elle est simplement ignorée pour la hauteur (CLAUDE.md, point 5).
  */
 @Component
 public class ValidateurStructure {
@@ -47,6 +48,11 @@ public class ValidateurStructure {
 			if (!paires.add(Math.min(depart.getId(), arrivee.getId()) + "-" + Math.max(depart.getId(), arrivee.getId()))) {
 				throw new ExceptionMetier(CodeErreur.STR_003,
 						"Deux liens relient les nœuds " + depart.getId() + " et " + arrivee.getId() + ".");
+			}
+			Noeud traverse = Geometrie.noeudTraverse(niveau, depart, arrivee);
+			if (traverse != null) {
+				throw new ExceptionMetier(CodeErreur.STR_006, "Le lien %d-%d passe sur le nœud %d : pose deux liens à la place."
+						.formatted(depart.getId(), arrivee.getId(), traverse.getId()));
 			}
 			double longueurLien = Geometrie.longueur(depart, arrivee);
 			if (longueurLien > longueurMax) {

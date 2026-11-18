@@ -76,6 +76,13 @@ class SimulationControllerTests {
 	}
 
 	@Test
+	void unLienQuiTraverseUnNoeudDonneStr006() throws Exception {
+		// 1 (0 ; 0) à 7 (0 ; 5) passe sur le nœud 4 (0 ; 2,5)
+		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":7,\"materiauId\":\"BOIS\"}]}"))
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("STR-006"));
+	}
+
+	@Test
 	void unNoeudDUnAutreNiveauDonneStr002() throws Exception {
 		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":101,\"materiauId\":\"BOIS\"}]}"))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("STR-002"));

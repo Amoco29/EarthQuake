@@ -29,4 +29,24 @@ public final class Geometrie {
 		}
 		return pas == Double.MAX_VALUE ? 0 : pas * Math.sqrt(2) + 1e-9;
 	}
+
+	/** Un nœud autre que les extrémités qui se trouve exactement sur le segment [a, b], ou {@code null}. */
+	public static Noeud noeudTraverse(Niveau niveau, Noeud a, Noeud b) {
+		double dx = b.getPosX() - a.getPosX();
+		double dy = b.getPosY() - a.getPosY();
+		double carre = dx * dx + dy * dy;
+		for (Noeud n : niveau.getNoeuds()) {
+			if (n.getId().equals(a.getId()) || n.getId().equals(b.getId())) {
+				continue;
+			}
+			double px = n.getPosX() - a.getPosX();
+			double py = n.getPosY() - a.getPosY();
+			double alignement = Math.abs(dx * py - dy * px) / Math.sqrt(carre); // distance du nœud à la droite
+			double position = (px * dx + py * dy) / carre; // 0 en a, 1 en b
+			if (alignement < 1e-9 && position > 1e-9 && position < 1 - 1e-9) {
+				return n;
+			}
+		}
+		return null;
+	}
 }

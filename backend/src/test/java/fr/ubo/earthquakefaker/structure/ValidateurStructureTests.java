@@ -90,6 +90,24 @@ class ValidateurStructureTests {
 	}
 
 	@Test
+	void refuseUnLienQuiPasseSurUnNoeudIntermediaire() {
+		// 1 (0 ; 0) à 5 (0 ; 5) traverse le nœud 3 (0 ; 2,5) : plus précis que « trop long »
+		assertCode(structure(new Lien(1L, 5L, "BOIS")), CodeErreur.STR_006);
+		assertCode(structure(new Lien(5L, 1L, "BOIS")), CodeErreur.STR_006);
+	}
+
+	@Test
+	void unLienTropLongSansNoeudSurSonTrajetResteStr005() {
+		// 1-6 passe entre les nœuds sans en toucher aucun : trop long, pas « traverse »
+		assertCode(structure(new Lien(1L, 6L, "BOIS")), CodeErreur.STR_005);
+	}
+
+	@Test
+	void refuseUnLienQuiSeSuperposeEnPartieAUnAutre() {
+		assertCode(structure(new Lien(1L, 3L, "BOIS"), new Lien(1L, 5L, "BOIS")), CodeErreur.STR_006);
+	}
+
+	@Test
 	void accepteLaDiagonaleDUneCellule() {
 		// 1 à 4 : 3,54 m, exactement la longueur maximale ; 4 à 6 monte à 5 m
 		assertThatCode(() -> validateur.valider(niveau(), catalogue,
