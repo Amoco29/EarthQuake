@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chargerNiveau, simulerNiveau } from './api.js'
+import { phraseDuPremierLienCasse, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
 import { calculerEchelle, PIXELS_PAR_METRE } from './geometrie.js'
@@ -38,6 +39,12 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const hauteur = niveau ? hauteurAtteinte(liens, niveau) : 0
 
   const echelle = niveau && espace.hauteur > 0 ? calculerEchelle(niveau, espace) : PIXELS_PAR_METRE
+
+  // À l'échec, après la secousse : le (ou les) premier lien cassé clignote sur le canvas.
+  const surlignes = useMemo(
+    () => (resultat && animationFinie && !resultat.estValide ? premiersLiensCasses(resultat.detailsLiens) : []),
+    [resultat, animationFinie],
+  )
 
   const finAnimation = useCallback(() => setAnimationFinie(true), [])
 
@@ -110,6 +117,8 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             liens={liens}
             materiauChoisi={choisi}
             resultat={resultat}
+            termine={animationFinie}
+            surlignes={surlignes}
             onLien={(a, b) => choisi && setLiens((l) => ajouterLien(l, a, b, choisi))}
             onSupprimer={(a, b) => setLiens((l) => supprimerLien(l, a, b))}
             onFin={finAnimation}
@@ -134,6 +143,9 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             <div className={`bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
               <h2>{resultat.estValide ? 'Niveau réussi !' : 'Niveau raté'}</h2>
               <p>{resultat.messageBilan}</p>
+              {!resultat.estValide && phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId) && (
+                <p>{phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId)}</p>
+              )}
               <p>
                 Solidité : <span className="chiffre">{resultat.scoreSoliditeGlobal} / 100</span>
               </p>

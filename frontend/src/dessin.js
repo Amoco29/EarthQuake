@@ -37,7 +37,7 @@ function dessinerLien(ctx, a, b, couleur, casse, largeur) {
  * scene : { niveau, materiaux, liens, drag, materiauChoisi, resultat, temps }
  * `resultat` + `temps` : mode séisme (couleurs de stress, secousse, liens cassés).
  */
-export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, temps }) {
+export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, temps, surlignes = [] }) {
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
   ctx.clearRect(0, 0, largeur, hauteur)
 
@@ -112,6 +112,33 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, ma
       ctx.arc(x, y, rayonNoeud(echelle), 0, Math.PI * 2)
     }
     ctx.fill()
+  }
+
+  dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, temps)
+  ctx.restore()
+}
+
+/** Halo rouge qui clignote (2 fois par seconde) sur les liens fragiles et leurs deux nœuds. */
+function dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, temps) {
+  if (surlignes.length === 0) return
+  ctx.save()
+  ctx.globalAlpha = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(temps * Math.PI * 4))
+  ctx.strokeStyle = '#ff1744'
+  ctx.lineCap = 'round'
+  for (const s of surlignes) {
+    const a = pixels(noeuds[s.noeudDepartId], niveau, echelle)
+    const b = pixels(noeuds[s.noeudArriveeId], niveau, echelle)
+    ctx.lineWidth = largeurLien(echelle) + 10
+    ctx.beginPath()
+    ctx.moveTo(a.x, a.y)
+    ctx.lineTo(b.x, b.y)
+    ctx.stroke()
+    ctx.lineWidth = 3
+    for (const p of [a, b]) {
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, rayonNoeud(echelle) + 6, 0, Math.PI * 2)
+      ctx.stroke()
+    }
   }
   ctx.restore()
 }

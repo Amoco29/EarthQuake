@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { animationTerminee } from './animation.js'
+import { animationTerminee, DUREE_ANIMATION } from './animation.js'
 import { dessinerScene, POLICE } from './dessin.js'
 import { dimensionsCanvas, lienSous, noeudSous } from './geometrie.js'
 
 /**
  * Canvas du niveau. En construction : glisser d'un nœud à un autre pose un lien du matériau choisi,
- * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin`.
+ * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
+ * ensuite (`termine`), les liens `surlignes` clignotent.
  */
-export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, onLien, onSupprimer, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, termine, surlignes, onLien, onSupprimer, onFin }) {
   const ref = useRef(null)
   const [drag, setDrag] = useState(null)
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
@@ -16,7 +17,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
     let annule = false
     let image = 0
     const ctx = ref.current.getContext('2d')
-    const scene = { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat }
+    const scene = { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, surlignes }
 
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
@@ -26,12 +27,22 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
         dessinerScene(ctx, { ...scene, temps: 0 })
         return
       }
+      if (termine && surlignes.length === 0) {
+        dessinerScene(ctx, { ...scene, temps: DUREE_ANIMATION })
+        return
+      }
       const debut = performance.now()
       const boucle = (maintenant) => {
         if (annule) return
-        const temps = (maintenant - debut) / 1000
-        dessinerScene(ctx, { ...scene, temps })
-        if (animationTerminee(temps)) {
+        const ecoule = (maintenant - debut) / 1000
+        if (termine) {
+          // Séisme fini : image finale, avec le halo qui clignote
+          dessinerScene(ctx, { ...scene, temps: DUREE_ANIMATION + ecoule })
+          image = requestAnimationFrame(boucle)
+          return
+        }
+        dessinerScene(ctx, { ...scene, temps: ecoule })
+        if (animationTerminee(ecoule)) {
           onFin?.()
         } else {
           image = requestAnimationFrame(boucle)
@@ -43,7 +54,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
       annule = true
       cancelAnimationFrame(image)
     }
-  }, [niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, onFin])
+  }, [niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, termine, surlignes, onFin])
 
   function position(e) {
     const rect = ref.current.getBoundingClientRect()
