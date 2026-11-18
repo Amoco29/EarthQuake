@@ -1,0 +1,42 @@
+[
+  {
+    "id": "BOIS",
+    "nom": "Bois",
+    "couleurHex": "#8B5A2B",
+    "coutUnitaire": 10,
+    "masseLineique": 5,
+    "resistanceTractionMax": 20,
+    "resistanceCompressionMax": 15,
+    "moduleElasticite": 11
+  },
+  {
+    "id": "BETON",
+    "nom": "Béton",
+    "couleurHex": "#9E9E9E",
+    "coutUnitaire": 25,
+    "masseLineique": 60,
+    "resistanceTractionMax": 5,
+    "resistanceCompressionMax": 50,
+    "moduleElasticite": 30
+  },
+  {
+    "id": "ACIER",
+    "nom": "Acier",
+    "couleurHex": "#4A6FA5",
+    "coutUnitaire": 40,
+    "masseLineique": 30,
+    "resistanceTractionMax": 60,
+    "resistanceCompressionMax": 60,
+    "moduleElasticite": 200
+  },
+  {
+    "id": "AMORTISSEUR",
+    "nom": "Amortisseur",
+    "couleurHex": "#E8A33D",
+    "coutUnitaire": 60,
+    "masseLineique": 15,
+    "resistanceTractionMax": 25,
+    "resistanceCompressionMax": 25,
+    "moduleElasticite": 2
+  }
+]
