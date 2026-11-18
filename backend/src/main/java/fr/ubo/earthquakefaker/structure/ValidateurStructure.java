@@ -56,7 +56,7 @@ public class ValidateurStructure {
 			}
 			double longueurLien = Geometrie.longueur(depart, arrivee);
 			if (longueurLien > longueurMax) {
-				throw new ExceptionMetier(CodeErreur.STR_005, "Le lien %d-%d mesure %.1f m : un lien relie seulement des nœuds voisins (%.1f m maximum)."
+				throw new ExceptionMetier(CodeErreur.STR_005, "Le lien %d-%d mesure %.1f m : un lien relie seulement des nœuds voisins (%.2f m maximum)."
 						.formatted(depart.getId(), arrivee.getId(), longueurLien, longueurMax));
 			}
 			Materiau materiau = lien.materiauId() == null ? null : catalogue.get(lien.materiauId());
