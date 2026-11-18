@@ -72,20 +72,21 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const hauteurOk = hauteur >= niveau.hauteurMinRequise
 
   return (
-    <main>
-      <button onClick={onRetour}>← Carte</button>
-      <h1>
-        Niveau {niveau.numero} : {niveau.nom}
-      </h1>
-
-      <div className="indicateurs">
-        <span className={budgetDepasse ? 'mauvais' : ''}>
-          Budget : {cout.toFixed(0)} / {niveau.budgetMax}
-        </span>
-        <span className={hauteurOk ? 'bon' : ''}>
-          Hauteur : {hauteur.toFixed(1)} / {niveau.hauteurMinRequise} m
-        </span>
-      </div>
+    <main className="jeu">
+      <header className="entete">
+        <button onClick={onRetour}>← Carte</button>
+        <h1>
+          Niveau {niveau.numero} : {niveau.nom}
+        </h1>
+        <div className="indicateurs">
+          <span className={budgetDepasse ? 'mauvais' : ''}>
+            Budget : {cout.toFixed(0)} / {niveau.budgetMax}
+          </span>
+          <span className={hauteurOk ? 'bon' : ''}>
+            Hauteur : {hauteur.toFixed(1)} / {niveau.hauteurMinRequise} m
+          </span>
+        </div>
+      </header>
 
       <div className="plateau">
         <PanneauMateriaux
@@ -94,43 +95,52 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           choisi={choisi}
           onChoisir={setChoisi}
         />
-        <NiveauCanvas
-          niveau={niveau}
-          materiaux={parId}
-          liens={liens}
-          materiauChoisi={choisi}
-          resultat={resultat}
-          onLien={(a, b) => choisi && setLiens((l) => ajouterLien(l, a, b, choisi))}
-          onSupprimer={(a, b) => setLiens((l) => supprimerLien(l, a, b))}
-          onFin={finAnimation}
-        />
-      </div>
 
-      <div className="actions">
-        {!resultat && (
-          <>
-            <button onClick={simuler} disabled={enCours || liens.length === 0}>
-              Lancer le séisme
-            </button>{' '}
-            <button onClick={() => setLiens([])} disabled={liens.length === 0}>
-              Tout effacer
-            </button>
-          </>
-        )}
-      </div>
+        <div className="zone-canvas">
+          <NiveauCanvas
+            niveau={niveau}
+            materiaux={parId}
+            liens={liens}
+            materiauChoisi={choisi}
+            resultat={resultat}
+            onLien={(a, b) => choisi && setLiens((l) => ajouterLien(l, a, b, choisi))}
+            onSupprimer={(a, b) => setLiens((l) => supprimerLien(l, a, b))}
+            onFin={finAnimation}
+          />
+        </div>
 
-      <MessageErreur erreur={erreurSimulation} />
+        <section className="colonne-resultat">
+          {!resultat && (
+            <div className="actions">
+              <button onClick={simuler} disabled={enCours || liens.length === 0}>
+                Lancer le séisme
+              </button>
+              <button onClick={() => setLiens([])} disabled={liens.length === 0}>
+                Tout effacer
+              </button>
+            </div>
+          )}
 
-      {resultat && animationFinie && (
-        <section className={`bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
-          <h2>{resultat.estValide ? 'Niveau réussi !' : 'Niveau raté'}</h2>
-          <p>{resultat.messageBilan}</p>
-          <p>Solidité : {resultat.scoreSoliditeGlobal} / 100</p>
-          <button onClick={recommencer}>Modifier ma structure</button>{' '}
-          {resultat.estValide && suivantId && <button onClick={() => onChoisirNiveau(suivantId)}>Niveau suivant →</button>}{' '}
-          {resultat.estValide && !suivantId && <p>Tu as terminé tous les niveaux !</p>}
+          <MessageErreur erreur={erreurSimulation} />
+
+          {resultat && animationFinie && (
+            <div className={`bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
+              <h2>{resultat.estValide ? 'Niveau réussi !' : 'Niveau raté'}</h2>
+              <p>{resultat.messageBilan}</p>
+              <p>
+                Solidité : <span className="chiffre">{resultat.scoreSoliditeGlobal} / 100</span>
+              </p>
+              <div className="actions">
+                <button onClick={recommencer}>Modifier ma structure</button>
+                {resultat.estValide && suivantId && (
+                  <button onClick={() => onChoisirNiveau(suivantId)}>Niveau suivant →</button>
+                )}
+              </div>
+              {resultat.estValide && !suivantId && <p>Tu as terminé tous les niveaux !</p>}
+            </div>
+          )}
         </section>
-      )}
+      </div>
     </main>
   )
 }

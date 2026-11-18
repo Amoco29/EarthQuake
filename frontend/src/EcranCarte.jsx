@@ -6,7 +6,7 @@ const DECORS = { prairie: '#8fd18a', montagne: '#b8b8c8', ville: '#e0b878' }
  */
 export default function EcranCarte({ niveaux, scores, onChoisir }) {
   return (
-    <main>
+    <main className="ecran-carte">
       <h1>EarthQuake Faker</h1>
       <p>Aide Félix Fixe Junior à construire des structures qui résistent aux séismes.</p>
       <ol className="carte">
