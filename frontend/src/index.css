@@ -1,0 +1,16 @@
+/* La police pokemon.ttf est fournie par Ilann dans public/fonts (ne pas la télécharger).
+   Si le fichier est absent, le navigateur passe au repli suivant. */
+@font-face {
+  font-family: 'Pokemon';
+  src: url('/fonts/pokemon.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  font-family: 'Pokemon', 'Press Start 2P', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+}
