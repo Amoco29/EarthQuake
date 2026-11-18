@@ -12,6 +12,8 @@ import { dimensionsCanvas, lienSous, noeudSous, pixelsVersMetres } from './geome
 export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onFin }) {
   const ref = useRef(null)
   const [drag, setDrag] = useState(null)
+  // Débuts des animations, gardés hors de l'effet : un redimensionnement ne doit pas les relancer.
+  const debuts = useRef({ secousse: null, clignote: null })
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
     police.catch(() => {}).then(() => {
       if (annule) return
       if (!resultat) {
+        debuts.current = { secousse: null, clignote: null }
         dessinerScene(ctx, { ...scene, temps: 0 })
         return
       }
@@ -32,7 +35,9 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
         dessinerScene(ctx, { ...scene, temps: DUREE_ANIMATION })
         return
       }
-      const debut = performance.now()
+      const phase = termine ? 'clignote' : 'secousse'
+      debuts.current[phase] ??= performance.now()
+      const debut = debuts.current[phase]
       const boucle = (maintenant) => {
         if (annule) return
         const ecoule = (maintenant - debut) / 1000
