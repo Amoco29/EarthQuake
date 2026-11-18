@@ -84,6 +84,24 @@ class MoteurSismiqueTests {
 	}
 
 	@Test
+	void lesLiensCassesNeComptentPasDansLaHauteurAtteinte() {
+		// Les poteaux du haut (3-5 et 4-6) sont en matériau très faible : ils cassent, il ne reste que 2,5 m reliés au sol.
+		Map<String, Materiau> catalogue = Map.of(
+				"BOIS", new Materiau("BOIS", "Bois", "#8B5A2B", 10, 2, 1000, 1000, 1),
+				"FRAGILE", new Materiau("FRAGILE", "Fragile", "#CCCCCC", 10, 2, 0.001, 0.001, 1));
+		Niveau niveau = niveau();
+		niveau.autoriserMateriau("FRAGILE");
+		Structure structure = new Structure(List.of(
+				new Lien(1L, 3L, "BOIS"), new Lien(2L, 4L, "BOIS"), new Lien(3L, 4L, "BOIS"), new Lien(1L, 4L, "BOIS"),
+				new Lien(3L, 5L, "FRAGILE"), new Lien(4L, 6L, "FRAGILE"), new Lien(5L, 6L, "BOIS")));
+
+		ResultatSimulation resultat = moteur.simulerSeisme(niveau, catalogue, structure);
+
+		assertThat(resultat.estValide()).isFalse();
+		assertThat(resultat.messageBilan()).containsPattern("Il ne reste que 2[,.]5 m").containsPattern("5[,.]0 m requis");
+	}
+
+	@Test
 	void uneStructureQuiViolesLesReglesDeConstructionLeveUneErreurMetier() {
 		assertThatThrownBy(() -> moteur.simulerSeisme(niveau(), catalogue(1000), new Structure(List.of())))
 				.isInstanceOf(ExceptionMetier.class)
