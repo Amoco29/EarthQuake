@@ -15,9 +15,9 @@ import fr.ubo.earthquakefaker.niveau.Niveau;
 import fr.ubo.earthquakefaker.niveau.Noeud;
 
 /**
- * Mini-niveau : zone 5 x 10, hauteur requise 5, budget 100.
- * Ancrages 1 (0,0) et 2 (5,0) ; nœuds 3 (0,5), 4 (5,5), 5 (0,10), 6 (2,2) flottant.
- * Le bois coûte 10 le mètre : un lien vertical de 5 m coûte 50.
+ * Mini-niveau sur une grille de 2,5 m : zone 5 x 10, hauteur requise 5, budget 100.
+ * Ancrages 1 (0 ; 0) et 2 (2,5 ; 0) ; nœuds 3 (0 ; 2,5), 4 (2,5 ; 2,5), 5 (0 ; 5), 6 (2,5 ; 5).
+ * Le bois coûte 10 le mètre : un lien de 2,5 m coûte 25. Longueur maximale d'un lien : 2,5 x racine de 2.
  */
 class ValidateurStructureTests {
 
@@ -31,11 +31,11 @@ class ValidateurStructureTests {
 	private Niveau niveau() {
 		Niveau niveau = new Niveau(1L, 1, "Test", "prairie", 100, 5, 3, 5, 10);
 		niveau.ajouterNoeud(new Noeud(1L, 0, 0, true));
-		niveau.ajouterNoeud(new Noeud(2L, 5, 0, true));
-		niveau.ajouterNoeud(new Noeud(3L, 0, 5, false));
-		niveau.ajouterNoeud(new Noeud(4L, 5, 5, false));
-		niveau.ajouterNoeud(new Noeud(5L, 0, 10, false));
-		niveau.ajouterNoeud(new Noeud(6L, 2, 2, false));
+		niveau.ajouterNoeud(new Noeud(2L, 2.5, 0, true));
+		niveau.ajouterNoeud(new Noeud(3L, 0, 2.5, false));
+		niveau.ajouterNoeud(new Noeud(4L, 2.5, 2.5, false));
+		niveau.ajouterNoeud(new Noeud(5L, 0, 5, false));
+		niveau.ajouterNoeud(new Noeud(6L, 2.5, 5, false));
 		niveau.autoriserMateriau("BOIS");
 		niveau.autoriserMateriau("ACIER");
 		return niveau;
@@ -53,7 +53,8 @@ class ValidateurStructureTests {
 
 	@Test
 	void accepteUneStructureValide() {
-		assertThatCode(() -> validateur.valider(niveau(), catalogue, structure(new Lien(1L, 3L, "BOIS")))).doesNotThrowAnyException();
+		assertThatCode(() -> validateur.valider(niveau(), catalogue,
+				structure(new Lien(1L, 3L, "BOIS"), new Lien(3L, 5L, "BOIS")))).doesNotThrowAnyException();
 	}
 
 	@Test
@@ -78,6 +79,24 @@ class ValidateurStructureTests {
 	}
 
 	@Test
+	void refuseDeuxLiensSuperposesDeMateriauxDifferents() {
+		assertCode(structure(new Lien(1L, 3L, "BOIS"), new Lien(1L, 3L, "ACIER")), CodeErreur.STR_003);
+	}
+
+	@Test
+	void refuseUnLienTropLong() {
+		// 1 (0 ; 0) à 6 (2,5 ; 5) : 5,6 m, et aucun nœud sur le trajet
+		assertCode(structure(new Lien(1L, 6L, "BOIS")), CodeErreur.STR_005);
+	}
+
+	@Test
+	void accepteLaDiagonaleDUneCellule() {
+		// 1 à 4 : 3,54 m, exactement la longueur maximale ; 4 à 6 monte à 5 m
+		assertThatCode(() -> validateur.valider(niveau(), catalogue,
+				structure(new Lien(1L, 4L, "BOIS"), new Lien(4L, 6L, "BOIS")))).doesNotThrowAnyException();
+	}
+
+	@Test
 	void refuseUnMateriauInconnu() {
 		assertCode(structure(new Lien(1L, 3L, "PLASTIQUE")), CodeErreur.MAT_001);
 		assertCode(structure(new Lien(1L, 3L, null)), CodeErreur.MAT_001);
@@ -90,15 +109,16 @@ class ValidateurStructureTests {
 
 	@Test
 	void refuseUnBudgetDepasse() {
-		// 5 m d'acier = 200 > 100
-		assertCode(structure(new Lien(1L, 3L, "ACIER")), CodeErreur.BUD_001);
+		// deux liens d'acier de 2,5 m = 200 > 100
+		assertCode(structure(new Lien(1L, 3L, "ACIER"), new Lien(3L, 5L, "ACIER")), CodeErreur.BUD_001);
 	}
 
 	@Test
 	void accepteUnCoutExactementEgalAuBudget() {
-		// 2 liens de 5 m en bois = 100
+		// quatre liens de bois de 2,5 m = 100
 		assertThatCode(() -> validateur.valider(niveau(), catalogue,
-				structure(new Lien(1L, 3L, "BOIS"), new Lien(2L, 4L, "BOIS")))).doesNotThrowAnyException();
+				structure(new Lien(1L, 3L, "BOIS"), new Lien(3L, 5L, "BOIS"),
+						new Lien(2L, 4L, "BOIS"), new Lien(4L, 6L, "BOIS")))).doesNotThrowAnyException();
 	}
 
 	@Test
@@ -108,18 +128,19 @@ class ValidateurStructureTests {
 
 	@Test
 	void refuseUneStructureTropBasse() {
-		assertCode(structure(new Lien(1L, 6L, "BOIS")), CodeErreur.STR_004);
+		assertCode(structure(new Lien(1L, 3L, "BOIS")), CodeErreur.STR_004);
 	}
 
 	@Test
 	void neCompteQueLaHauteurDesNoeudsReliesAuSol() {
-		// 3-5 monte à 10 m mais n'est pas relié au sol ; la partie reliée (1-6) reste trop basse.
-		assertCode(structure(new Lien(1L, 6L, "BOIS"), new Lien(3L, 5L, "BOIS")), CodeErreur.STR_004);
+		// 5-6 est à 5 m mais n'est pas relié au sol ; la partie reliée (1-3) reste trop basse.
+		assertCode(structure(new Lien(1L, 3L, "BOIS"), new Lien(5L, 6L, "BOIS")), CodeErreur.STR_004);
 	}
 
 	@Test
 	void accepteUnePieceFlottanteSiLeResteAtteintLaHauteur() {
 		assertThatCode(() -> validateur.valider(niveau(), catalogue,
-				structure(new Lien(1L, 3L, "BOIS"), new Lien(4L, 6L, "BOIS")))).doesNotThrowAnyException();
+				structure(new Lien(1L, 3L, "BOIS"), new Lien(3L, 5L, "BOIS"), new Lien(4L, 6L, "BOIS"))))
+				.doesNotThrowAnyException();
 	}
 }

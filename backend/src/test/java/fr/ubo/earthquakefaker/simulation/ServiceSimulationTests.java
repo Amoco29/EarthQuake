@@ -24,8 +24,8 @@ class ServiceSimulationTests {
 	void simuleLaSolutionDeLaPrairieAvecLesDonneesDeH2() {
 		// Mêmes liens que la solution de référence du niveau 1 (le verdict est réglé à la tâche 6).
 		Structure solution = new Structure(List.of(
-				new Lien(1L, 4L, "BETON"), new Lien(3L, 6L, "BETON"), new Lien(4L, 7L, "BOIS"), new Lien(6L, 9L, "BOIS"),
-				new Lien(4L, 6L, "BOIS"), new Lien(7L, 9L, "BOIS"), new Lien(1L, 6L, "BOIS"), new Lien(4L, 9L, "BOIS")));
+				new Lien(1L, 4L, "BETON"), new Lien(2L, 5L, "BETON"), new Lien(4L, 5L, "BOIS"), new Lien(1L, 5L, "BOIS"),
+				new Lien(4L, 7L, "BOIS"), new Lien(5L, 8L, "BOIS"), new Lien(7L, 8L, "BOIS"), new Lien(5L, 7L, "BOIS")));
 
 		ResultatSimulation resultat = service.simuler(1, solution);
 

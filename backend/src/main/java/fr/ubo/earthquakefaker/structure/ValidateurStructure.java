@@ -18,7 +18,7 @@ import fr.ubo.earthquakefaker.niveau.Noeud;
 /**
  * Règles de construction d'une structure, avant toute simulation. Classe pure : pas d'accès à la base,
  * le niveau et le catalogue de matériaux lui sont donnés. La première règle violée lève une {@link ExceptionMetier}.
- * Une pièce non reliée au sol n'est pas une erreur : elle est simplement ignorée pour la hauteur (CLAUDE.md, point 5).
+ * Un lien ne relie que des nœuds voisins (STR-005). Une pièce non reliée au sol n'est pas une erreur : elle est simplement ignorée pour la hauteur (CLAUDE.md, point 5).
  */
 @Component
 public class ValidateurStructure {
@@ -32,6 +32,7 @@ public class ValidateurStructure {
 		Set<String> paires = new HashSet<>();
 		Map<Long, Set<Long>> voisins = new HashMap<>();
 		double cout = 0;
+		double longueurMax = Geometrie.longueurMaxLien(niveau);
 
 		for (Lien lien : structure.liens()) {
 			Noeud depart = noeuds.get(lien.noeudDepartId());
@@ -47,6 +48,11 @@ public class ValidateurStructure {
 				throw new ExceptionMetier(CodeErreur.STR_003,
 						"Deux liens relient les nœuds " + depart.getId() + " et " + arrivee.getId() + ".");
 			}
+			double longueurLien = Geometrie.longueur(depart, arrivee);
+			if (longueurLien > longueurMax) {
+				throw new ExceptionMetier(CodeErreur.STR_005, "Le lien %d-%d mesure %.1f m : un lien relie seulement des nœuds voisins (%.1f m maximum)."
+						.formatted(depart.getId(), arrivee.getId(), longueurLien, longueurMax));
+			}
 			Materiau materiau = lien.materiauId() == null ? null : catalogue.get(lien.materiauId());
 			if (materiau == null) {
 				throw new ExceptionMetier(CodeErreur.MAT_001, "Matériau inconnu : " + lien.materiauId() + ".");
@@ -55,7 +61,7 @@ public class ValidateurStructure {
 				throw new ExceptionMetier(CodeErreur.MAT_002,
 						"Le matériau " + materiau.getId() + " n'est pas autorisé au niveau " + niveau.getNumero() + ".");
 			}
-			cout += materiau.getCoutUnitaire() * Geometrie.longueur(depart, arrivee);
+			cout += materiau.getCoutUnitaire() * longueurLien;
 			voisins.computeIfAbsent(depart.getId(), k -> new HashSet<>()).add(arrivee.getId());
 			voisins.computeIfAbsent(arrivee.getId(), k -> new HashSet<>()).add(depart.getId());
 		}

@@ -19,13 +19,13 @@ class SimulationControllerTests {
 	private static final String SOLUTION_NIVEAU_1 = """
 			{"liens":[
 			 {"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BETON"},
-			 {"noeudDepartId":3,"noeudArriveeId":6,"materiauId":"BETON"},
+			 {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BETON"},
+			 {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"BOIS"},
+			 {"noeudDepartId":1,"noeudArriveeId":5,"materiauId":"BOIS"},
 			 {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"BOIS"},
-			 {"noeudDepartId":6,"noeudArriveeId":9,"materiauId":"BOIS"},
-			 {"noeudDepartId":4,"noeudArriveeId":6,"materiauId":"BOIS"},
-			 {"noeudDepartId":7,"noeudArriveeId":9,"materiauId":"BOIS"},
-			 {"noeudDepartId":1,"noeudArriveeId":6,"materiauId":"BOIS"},
-			 {"noeudDepartId":4,"noeudArriveeId":9,"materiauId":"BOIS"}]}""";
+			 {"noeudDepartId":5,"noeudArriveeId":8,"materiauId":"BOIS"},
+			 {"noeudDepartId":7,"noeudArriveeId":8,"materiauId":"BOIS"},
+			 {"noeudDepartId":5,"noeudArriveeId":7,"materiauId":"BOIS"}]}""";
 
 	@Autowired
 	private MockMvc mvc;
@@ -52,9 +52,11 @@ class SimulationControllerTests {
 		// Sans diagonales : mécanisme, la structure s'effondre mais la requête est valide.
 		mvc.perform(simuler("1", """
 				{"liens":[{"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BETON"},
-				          {"noeudDepartId":3,"noeudArriveeId":6,"materiauId":"BETON"},
+				          {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BETON"},
+				          {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"BOIS"},
 				          {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"BOIS"},
-				          {"noeudDepartId":6,"noeudArriveeId":9,"materiauId":"BOIS"}]}"""))
+				          {"noeudDepartId":5,"noeudArriveeId":8,"materiauId":"BOIS"},
+				          {"noeudDepartId":7,"noeudArriveeId":8,"materiauId":"BOIS"}]}"""))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.estValide").value(false))
 				.andExpect(jsonPath("$.detailsLiens[0].estCasse").value(true))
@@ -65,6 +67,12 @@ class SimulationControllerTests {
 	void structureVideEtListeAbsenteDonnentStr001() throws Exception {
 		mvc.perform(simuler("1", "{\"liens\":[]}")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("STR-001"));
 		mvc.perform(simuler("1", "{}")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("STR-001"));
+	}
+
+	@Test
+	void unLienTropLongDonneStr005() throws Exception {
+		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":6,\"materiauId\":\"BOIS\"}]}"))
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("STR-005"));
 	}
 
 	@Test
@@ -83,16 +91,16 @@ class SimulationControllerTests {
 	void unBudgetDepasseDonneBud001() throws Exception {
 		mvc.perform(simuler("1", """
 				{"liens":[{"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"ACIER"},
-				          {"noeudDepartId":3,"noeudArriveeId":6,"materiauId":"ACIER"},
+				          {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"ACIER"},
 				          {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"ACIER"},
-				          {"noeudDepartId":6,"noeudArriveeId":9,"materiauId":"ACIER"},
-				          {"noeudDepartId":4,"noeudArriveeId":6,"materiauId":"ACIER"}]}"""))
+				          {"noeudDepartId":5,"noeudArriveeId":8,"materiauId":"ACIER"},
+				          {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"ACIER"}]}"""))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("BUD-001"));
 	}
 
 	@Test
 	void uneStructureNonRelieeAuSolDonneSim001EnStatut422() throws Exception {
-		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":4,\"noeudArriveeId\":6,\"materiauId\":\"BOIS\"}]}"))
+		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":4,\"noeudArriveeId\":5,\"materiauId\":\"BOIS\"}]}"))
 				.andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.codeErreur").value("SIM-001"));
 	}
 

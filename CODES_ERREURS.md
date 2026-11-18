@@ -21,6 +21,7 @@ Le catalogue est dans `backend/.../erreur/CodeErreur.java` : tout code ajouté l
 | **STR-002** | 400 | Nœud invalide | Un lien référence un ID de nœud qui n'appartient pas au niveau courant. | levé par `POST /api/niveaux/{id}/simuler` |
 | **STR-003** | 400 | Lien identique / boucle | Le nœud de départ et d'arrivée sont identiques, ou deux liens sont superposés. | levé par `POST /api/niveaux/{id}/simuler` |
 | **STR-004** | 400 | Hauteur minimale non atteinte | Aucun nœud relié au sol n'atteint la hauteur requise par le niveau. | levé par `POST /api/niveaux/{id}/simuler` |
+| **STR-005** | 400 | Lien trop long | Le lien relie deux nœuds non voisins : sa longueur dépasse le pas de la grille × √2 (≈ 3,54 m pour une grille de 2,5 m). | levé par `POST /api/niveaux/{id}/simuler` |
 
 ## 3. Contexte `BUD` (Budget)
 | Code | HTTP | Signification | Cause fréquente | État |

@@ -17,6 +17,7 @@ public enum CodeErreur {
 	STR_002("STR-002", "Validation de la structure", HttpStatus.BAD_REQUEST),
 	STR_003("STR-003", "Validation de la structure", HttpStatus.BAD_REQUEST),
 	STR_004("STR-004", "Validation de la hauteur", HttpStatus.BAD_REQUEST),
+	STR_005("STR-005", "Validation de la structure", HttpStatus.BAD_REQUEST),
 
 	BUD_001("BUD-001", "Validation du budget", HttpStatus.BAD_REQUEST),
 

@@ -5,14 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.ubo.earthquakefaker.materiau.Materiau;
+import fr.ubo.earthquakefaker.materiau.MateriauRepository;
 import fr.ubo.earthquakefaker.simulation.ResultatLien;
 import fr.ubo.earthquakefaker.simulation.ResultatSimulation;
 import fr.ubo.earthquakefaker.simulation.ServiceSimulation;
@@ -25,6 +30,7 @@ import fr.ubo.earthquakefaker.structure.Structure;
  * une solution qui les viole fait échouer la simulation avec le code d'erreur correspondant.
  */
 @SpringBootTest
+@Transactional // Niveau.noeuds est LAZY
 class SolutionsReferenceTests {
 
 	record LienJson(Long noeudDepartId, Long noeudArriveeId, String materiauId) {
@@ -35,6 +41,9 @@ class SolutionsReferenceTests {
 
 	@Autowired
 	private NiveauRepository niveaux;
+
+	@Autowired
+	private MateriauRepository materiaux;
 
 	@Autowired
 	private ObjectMapper mapper;
@@ -82,12 +91,41 @@ class SolutionsReferenceTests {
 		}
 	}
 
+	/** Coût recalculé ici, indépendamment du validateur : somme (coût au mètre x longueur) des liens. */
+	private double cout(Niveau niveau, List<LienJson> liens) {
+		Map<Long, Noeud> noeuds = niveau.getNoeuds().stream().collect(Collectors.toMap(Noeud::getId, n -> n));
+		Map<String, Materiau> catalogue = materiaux.findAll().stream().collect(Collectors.toMap(Materiau::getId, m -> m));
+		return liens.stream().mapToDouble(l -> {
+			Noeud a = noeuds.get(l.noeudDepartId());
+			Noeud b = noeuds.get(l.noeudArriveeId());
+			return catalogue.get(l.materiauId()).getCoutUnitaire() * Math.hypot(a.getPosX() - b.getPosX(), a.getPosY() - b.getPosY());
+		}).sum();
+	}
+
+	@Test
+	void chaqueSolutionDeReferenceGagneSousLeBudget() throws IOException {
+		for (SolutionJson solution : solutions()) {
+			Niveau niveau = niveaux.findById(solution.niveauId()).orElseThrow();
+			double cout = cout(niveau, solution.liens());
+
+			assertThat(cout).as("niveau %d : coût %.1f pour un budget de %.1f", niveau.getNumero(), cout, niveau.getBudgetMax())
+					.isLessThanOrEqualTo(niveau.getBudgetMax());
+			assertThat(simulation.simuler(niveau.getId(), structure(solution.liens())).estValide())
+					.as("niveau %d", niveau.getNumero()).isTrue();
+		}
+	}
+
 	@Test
 	void sansSesDiagonalesChaqueSolutionSEffondre() throws IOException {
-		// Les diagonales sont les derniers liens de chaque solution : 2 au niveau 1, 3 au niveau 2, 4 au niveau 3.
 		for (SolutionJson solution : solutions()) {
-			int diagonales = solution.niveauId().intValue() % 100 + 1;
-			List<LienJson> sans = solution.liens().subList(0, solution.liens().size() - diagonales);
+			Niveau niveau = niveaux.findById(solution.niveauId()).orElseThrow();
+			Map<Long, Noeud> noeuds = niveau.getNoeuds().stream().collect(Collectors.toMap(Noeud::getId, n -> n));
+			// une diagonale change à la fois de colonne et de rangée
+			List<LienJson> sans = solution.liens().stream().filter(l -> {
+				Noeud a = noeuds.get(l.noeudDepartId());
+				Noeud b = noeuds.get(l.noeudArriveeId());
+				return a.getPosX() == b.getPosX() || a.getPosY() == b.getPosY();
+			}).toList();
 
 			ResultatSimulation resultat = simulation.simuler(solution.niveauId(), structure(sans));
 
