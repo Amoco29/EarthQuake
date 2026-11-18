@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { chargerNiveau } from './api.js'
+import NiveauCanvas from './NiveauCanvas.jsx'
 
 function App() {
   const [id, setId] = useState('1')
@@ -34,6 +35,8 @@ function App() {
           {erreur.status ? ` (HTTP ${erreur.status})` : ''}
         </p>
       )}
+
+      {niveau && <NiveauCanvas niveau={niveau} />}
 
       {niveau && <pre>{JSON.stringify(niveau, null, 2)}</pre>}
     </main>
