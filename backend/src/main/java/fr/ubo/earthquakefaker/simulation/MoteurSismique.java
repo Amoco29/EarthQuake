@@ -51,9 +51,16 @@ public class MoteurSismique {
 					"La structure a résisté au séisme. Lien le plus sollicité : %.0f %% de sa résistance.".formatted(pire * 100),
 					details);
 		}
-		String message = pire >= CalculateurStress.TAUX_EFFONDREMENT
-				? "La structure s'est effondrée : elle n'est pas assez rigide, ajoute des diagonales."
-				: "%d lien(s) sur %d ont cassé. Renforce les liens les plus sollicités.".formatted(casses, details.size());
+		long effondres = details.stream().filter(r -> r.tauxStress() >= CalculateurStress.TAUX_EFFONDREMENT).count();
+		String message;
+		if (effondres == details.size()) {
+			message = "La structure s'est effondrée : elle n'est pas assez rigide, forme des triangles avec des diagonales.";
+		} else if (effondres > 0) {
+			message = "%d lien(s) sur %d se sont effondrés : cette partie n'est pas assez rigide, ajoute des diagonales."
+					.formatted(effondres, details.size());
+		} else {
+			message = "%d lien(s) sur %d ont cassé. Renforce les liens les plus sollicités.".formatted(casses, details.size());
+		}
 		return new ResultatSimulation(false, score, message, details);
 	}
 }

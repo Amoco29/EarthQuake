@@ -22,6 +22,7 @@ export default function PanneauMateriaux({ materiaux, autorises, choisi, onChois
       <p className="aide">
         Choisis un matériau, puis glisse d&apos;un nœud à un autre. Clique sur un lien pour l&apos;enlever.
       </p>
+      <p className="aide">Astuce : un carré se déforme, un triangle tient. Ajoute des diagonales.</p>
     </aside>
   )
 }

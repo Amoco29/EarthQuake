@@ -111,6 +111,28 @@ class CalculateurStressTests {
 	}
 
 	@Test
+	void seulLaPartieInstableSEffondreEtLeResteGardeSesVraisTaux() {
+		// Le triangle 1-2-3 est stable ; la barre 3-4 ne tient que par le sommet : le nœud 4 est libre, elle tombe.
+		List<ResultatLien> resultats = simuler(3, catalogue(1000, 1000),
+				new Lien(1L, 3L, "BOIS"), new Lien(2L, 3L, "BOIS"), new Lien(3L, 4L, "BOIS"));
+
+		assertThat(resultats.get(0).estCasse()).isFalse();
+		assertThat(resultats.get(0).tauxStress()).isBetween(0.0, 1.0);
+		assertThat(resultats.get(1).estCasse()).isFalse();
+		assertThat(resultats.get(2).estCasse()).isTrue();
+		assertThat(resultats.get(2).tauxStress()).isEqualTo(99);
+	}
+
+	@Test
+	void unCadreSansDiagonaleSEffondreEnEntier() {
+		// Deux poteaux et une traverse : un parallélogramme articulé, sans rien pour le rigidifier.
+		List<ResultatLien> resultats = simuler(3, catalogue(1000, 1000),
+				new Lien(1L, 4L, "BOIS"), new Lien(2L, 5L, "BOIS"), new Lien(4L, 5L, "BOIS"));
+
+		assertThat(resultats).allMatch(ResultatLien::estCasse);
+	}
+
+	@Test
 	void uneLiaisonPosseeAuSommetNEstPasTouchePourUnePieceFlottante() {
 		List<ResultatLien> resultats = simuler(3, catalogue(1000, 1000),
 				new Lien(1L, 3L, "BOIS"), new Lien(2L, 3L, "BOIS"), new Lien(4L, 5L, "BOIS"));
