@@ -53,7 +53,7 @@ public class ValidateurStructure {
 				throw new ExceptionMetier(CodeErreur.MAT_002,
 						"Le matériau " + materiau.getId() + " n'est pas autorisé au niveau " + niveau.getNumero() + ".");
 			}
-			cout += materiau.getCoutUnitaire() * longueur(depart, arrivee);
+			cout += materiau.getCoutUnitaire() * Geometrie.longueur(depart, arrivee);
 			voisins.computeIfAbsent(depart.getId(), k -> new HashSet<>()).add(arrivee.getId());
 			voisins.computeIfAbsent(arrivee.getId(), k -> new HashSet<>()).add(depart.getId());
 		}
@@ -93,9 +93,5 @@ public class ValidateurStructure {
 			}
 		}
 		return vus;
-	}
-
-	private static double longueur(Noeud a, Noeud b) {
-		return Math.hypot(a.getPosX() - b.getPosX(), a.getPosY() - b.getPosY());
 	}
 }
