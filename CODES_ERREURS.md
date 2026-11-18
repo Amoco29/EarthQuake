@@ -1,0 +1,45 @@
+# Référentiel des Codes Erreurs — EarthQuake Faker
+
+Format : `[CONTEXTE]-[NUMERO]`. Les erreurs sont renvoyées en JSON :
+`{ timestamp, codeErreur, contexte, message }`.
+
+Le catalogue est dans `backend/.../erreur/CodeErreur.java` : tout code ajouté là doit l'être ici
+(un test le vérifie). La colonne « État » indique si le code est déjà levé par le backend.
+
+## 1. Contexte `NIV` (Niveaux & Initialisation)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **NIV-001** | 404 | Niveau introuvable | L'ID demandé dans l'URL n'existe pas en base H2. | défini |
+| **NIV-002** | — (démarrage) | Erreur de chargement JSON | Le fichier `niveaux.json` est mal formaté ou contient des coordonnées hors grille (X > 5m ou Y > hauteur du niveau). | défini |
+| **NIV-003** | 400 | Identifiant de niveau invalide | L'ID dans l'URL n'est pas un nombre (ex : `/api/niveaux/abc`). | défini |
+| **NIV-004** | — (démarrage) | Erreur de chargement des matériaux | Le fichier `materiaux.json` est mal formaté ou contient des valeurs invalides (négatives, id en double). | défini |
+
+## 2. Contexte `STR` (Structure & Géométrie)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **STR-001** | 400 | Structure vide | Le joueur a lancé la simulation sans poser aucun lien. | défini, pas encore levé |
+| **STR-002** | 400 | Nœud invalide | Un lien référence un ID de nœud qui n'appartient pas au niveau courant. | défini, pas encore levé |
+| **STR-003** | 400 | Lien identique / boucle | Le nœud de départ et d'arrivée sont identiques, ou deux liens sont superposés. | défini, pas encore levé |
+| **STR-004** | 400 | Hauteur minimale non atteinte | Aucun nœud relié au sol n'atteint la hauteur requise par le niveau. | défini, pas encore levé |
+
+## 3. Contexte `BUD` (Budget)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **BUD-001** | 400 | Budget dépassé | La somme des coûts des liens posés est supérieure au `budgetMax` du niveau. | défini, pas encore levé |
+
+## 4. Contexte `MAT` (Matériaux)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **MAT-001** | 400 | Matériau inconnu | L'identifiant du matériau envoyé par React n'existe pas dans le système. | défini, pas encore levé |
+| **MAT-002** | 400 | Matériau verrouillé | Le joueur tente d'utiliser un matériau non autorisé dans ce niveau (ex : Amortisseur au niveau 1). | défini, pas encore levé |
+
+## 5. Contexte `SIM` (Moteur Sismique)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **SIM-001** | 422 | Aucun ancrage au sol | La structure n'est reliée à aucun nœud ayant `estAncrageSol = true`. | défini, pas encore levé |
+
+## 6. Contexte `SYS` (Technique)
+| Code | HTTP | Signification | Cause fréquente | État |
+| :--- | :--- | :--- | :--- | :--- |
+| **SYS-001** | 500 | Erreur interne | Exception non prévue. Le détail est dans les logs du backend, jamais dans la réponse. | défini |
+| **SYS-002** | 4xx | Requête HTTP invalide | Route inexistante (404), méthode non autorisée (405), corps JSON illisible (400)... Le statut est celui de l'erreur d'origine. | défini |
