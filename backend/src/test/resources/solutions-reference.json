@@ -750,5 +750,46 @@
         "materiauId": "BOIS"
       }
     ]
+  },
+  {
+    "niveauId": 0,
+    "description": "Deux carrés côte à côte, chacun avec une diagonale (tutoriel). Atteint 2,5 m. Coût attendu : environ 195.7.",
+    "liens": [
+      {
+        "noeudDepartId": 901,
+        "noeudArriveeId": 904,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 902,
+        "noeudArriveeId": 905,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 903,
+        "noeudArriveeId": 906,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 904,
+        "noeudArriveeId": 905,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 905,
+        "noeudArriveeId": 906,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 901,
+        "noeudArriveeId": 905,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 903,
+        "noeudArriveeId": 905,
+        "materiauId": "BOIS"
+      }
+    ]
   }
 ]

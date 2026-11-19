@@ -31,12 +31,12 @@ class LecteurNiveauxTests {
 	}
 
 	@Test
-	void leFichierDuJeuContientSeptNiveauxValides() throws IOException {
+	void leFichierDuJeuContientHuitNiveauxValides() throws IOException {
 		List<Niveau> niveaux = lireFichierDuJeu();
 
-		assertThat(niveaux).extracting(Niveau::getId).containsExactly(1L, 2L, 3L, 4L, 5L, 6L, 7L);
-		assertThat(niveaux).extracting(Niveau::getHauteurZone).containsExactly(10.0, 12.0, 12.0, 12.0, 15.0, 15.0, 15.0);
-		assertThat(niveaux).extracting(Niveau::getHauteurMinRequise).containsExactly(5.0, 7.0, 9.0, 9.0, 10.0, 11.0, 12.0);
+		assertThat(niveaux).extracting(Niveau::getId).containsExactly(1L, 2L, 3L, 4L, 5L, 6L, 7L, 0L);
+		assertThat(niveaux).extracting(Niveau::getHauteurZone).containsExactly(10.0, 12.0, 12.0, 12.0, 15.0, 15.0, 15.0, 10.0);
+		assertThat(niveaux).extracting(Niveau::getHauteurMinRequise).containsExactly(5.0, 7.0, 9.0, 9.0, 10.0, 11.0, 12.0, 2.5);
 		assertThat(niveaux).allSatisfy(n -> {
 			assertThat(n.getLargeurZone()).isEqualTo(5);
 			assertThat(n.getNoeuds()).anyMatch(Noeud::isEstAncrageSol);
@@ -55,7 +55,7 @@ class LecteurNiveauxTests {
 	void lesNoeudsDuFichierDuJeuOntDesIdsUniquesSurTousLesNiveaux() throws IOException {
 		List<Long> ids = lireFichierDuJeu().stream().flatMap(n -> n.getNoeuds().stream()).map(Noeud::getId).toList();
 
-		assertThat(ids).doesNotHaveDuplicates().hasSize(12 + 15 + 15 + 14 + 17 + 18 + 16);
+		assertThat(ids).doesNotHaveDuplicates().hasSize(12 + 15 + 15 + 14 + 17 + 18 + 16 + 6);
 	}
 
 	@Test

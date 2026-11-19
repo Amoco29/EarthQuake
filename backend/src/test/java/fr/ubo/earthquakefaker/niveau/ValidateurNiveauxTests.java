@@ -78,6 +78,13 @@ class ValidateurNiveauxTests {
 	}
 
 	@Test
+	void accepteLeNumeroZeroDuTutorielEtRejetteUnNumeroNegatif() {
+		assertThatCode(() -> validateur.valider(List.of(niveau(0, 0, 5, 10, 5, List.of("BOIS"), noeudsValides(1))), MATERIAUX))
+				.doesNotThrowAnyException();
+		assertRejete(List.of(niveau(1, -1, 5, 10, 5, List.of("BOIS"), noeudsValides(1))), "numero");
+	}
+
+	@Test
 	void rejetteUneLargeurDifferenteDeCinq() {
 		assertRejete(List.of(niveau(1, 1, 6, 10, 5, List.of("BOIS"), noeudsValides(1))), "largeurZone");
 	}

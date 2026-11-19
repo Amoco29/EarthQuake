@@ -39,8 +39,8 @@ public class ValidateurNiveaux {
 		if (!idsNiveaux.add(n.id())) {
 			throw erreur("id de niveau en double : " + n.id());
 		}
-		if (n.numero() == null || n.numero() < 1 || !numeros.add(n.numero())) {
-			throw erreur(ref + "numero manquant, inférieur à 1 ou en double");
+		if (n.numero() == null || n.numero() < 0 || !numeros.add(n.numero())) {
+			throw erreur(ref + "numero manquant, négatif ou en double");
 		}
 		exigerTexte(ref + "nom", n.nom());
 		exigerTexte(ref + "themeDecor", n.themeDecor());

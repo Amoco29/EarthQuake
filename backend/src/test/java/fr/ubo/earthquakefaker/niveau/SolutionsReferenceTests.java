@@ -84,6 +84,7 @@ class SolutionsReferenceTests {
 	void lesSolutionsDeReferenceRestentAssezSerreesPourQueLeSeismeCompte() throws IOException {
 		// Le lien le plus sollicité d'une solution gagnante ne doit pas être quasi à vide : sinon le niveau est trop facile.
 		for (SolutionJson solution : solutions()) {
+			if (solution.niveauId() == 0) continue; // le tutoriel est volontairement très facile
 			double pire = simulation.simuler(solution.niveauId(), structure(solution.liens())).detailsLiens().stream()
 					.mapToDouble(ResultatLien::tauxStress).max().orElseThrow();
 

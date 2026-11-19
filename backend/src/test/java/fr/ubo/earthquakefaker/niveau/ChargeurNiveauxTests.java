@@ -27,8 +27,8 @@ class ChargeurNiveauxTests {
 	private ChargeurNiveaux chargeur;
 
 	@Test
-	void chargeLesSeptNiveauxEtLeursNoeudsAuDemarrage() {
-		assertThat(niveaux.count()).isEqualTo(7);
+	void chargeLesHuitNiveauxEtLeursNoeudsAuDemarrage() {
+		assertThat(niveaux.count()).isEqualTo(8);
 		assertThat(niveaux.findById(1L).orElseThrow().getNoeuds()).hasSize(12);
 		assertThat(niveaux.findById(2L).orElseThrow().getNoeuds()).hasSize(15);
 		assertThat(niveaux.findById(3L).orElseThrow().getNoeuds()).hasSize(15);
@@ -57,7 +57,7 @@ class ChargeurNiveauxTests {
 		assertThatThrownBy(() -> chargeur.charger(new ByteArrayInputStream(horsZone.getBytes(StandardCharsets.UTF_8))))
 				.isInstanceOf(ExceptionMetier.class)
 				.satisfies(e -> assertThat(((ExceptionMetier) e).getCodeErreur()).isEqualTo(CodeErreur.NIV_002));
-		assertThat(niveaux.count()).isEqualTo(7);
+		assertThat(niveaux.count()).isEqualTo(8);
 		assertThat(niveaux.findById(9L)).isEmpty();
 	}
 }

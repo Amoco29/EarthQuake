@@ -767,5 +767,57 @@
         "estAncrageSol": false
       }
     ]
+  },
+  {
+    "id": 0,
+    "numero": 0,
+    "nom": "Le tutoriel",
+    "themeDecor": "prairie",
+    "budgetMax": 250,
+    "hauteurMinRequise": 2.5,
+    "magnitudeSeisme": 1.5,
+    "largeurZone": 5,
+    "hauteurZone": 10,
+    "materiauxAutorises": [
+      "BOIS"
+    ],
+    "noeuds": [
+      {
+        "id": 901,
+        "posX": 0,
+        "posY": 0,
+        "estAncrageSol": true
+      },
+      {
+        "id": 902,
+        "posX": 2.5,
+        "posY": 0,
+        "estAncrageSol": true
+      },
+      {
+        "id": 903,
+        "posX": 5,
+        "posY": 0,
+        "estAncrageSol": true
+      },
+      {
+        "id": 904,
+        "posX": 0,
+        "posY": 2.5,
+        "estAncrageSol": false
+      },
+      {
+        "id": 905,
+        "posX": 2.5,
+        "posY": 2.5,
+        "estAncrageSol": false
+      },
+      {
+        "id": 906,
+        "posX": 5,
+        "posY": 2.5,
+        "estAncrageSol": false
+      }
+    ]
   }
 ]

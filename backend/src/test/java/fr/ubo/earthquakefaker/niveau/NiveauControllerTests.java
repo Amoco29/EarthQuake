@@ -102,10 +102,10 @@ class NiveauControllerTests {
 	void listeLesNiveauxParNumeroPourLaCarte() throws Exception {
 		mvc.perform(get("/api/niveaux"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.length()").value(7))
-				.andExpect(jsonPath("$[0].id").value(1))
-				.andExpect(jsonPath("$[0].nom").value("La prairie"))
-				.andExpect(jsonPath("$[2].numero").value(3))
-				.andExpect(jsonPath("$[0].noeuds").doesNotExist());
+				.andExpect(jsonPath("$.length()").value(8))
+				.andExpect(jsonPath("$[1].id").value(1))
+				.andExpect(jsonPath("$[1].nom").value("La prairie"))
+				.andExpect(jsonPath("$[3].numero").value(3))
+				.andExpect(jsonPath("$[1].noeuds").doesNotExist());
 	}
 }
