@@ -1,68 +1,754 @@
 [
   {
     "niveauId": 1,
-    "description": "Tour étroite à deux colonnes (2,5 m de large), deux étages triangulés, base en béton. Atteint 5 m. Coût attendu : environ 295.7.",
+    "description": "Tour triangulée à 2 colonnes, 8 liens (bois). Atteint 5 m. Coût attendu : environ 220.7.",
     "liens": [
-      { "noeudDepartId": 1, "noeudArriveeId": 4, "materiauId": "BETON" },
-      { "noeudDepartId": 2, "noeudArriveeId": 5, "materiauId": "BETON" },
-      { "noeudDepartId": 4, "noeudArriveeId": 5, "materiauId": "BOIS" },
-      { "noeudDepartId": 1, "noeudArriveeId": 5, "materiauId": "BOIS" },
-      { "noeudDepartId": 4, "noeudArriveeId": 7, "materiauId": "BOIS" },
-      { "noeudDepartId": 5, "noeudArriveeId": 8, "materiauId": "BOIS" },
-      { "noeudDepartId": 7, "noeudArriveeId": 8, "materiauId": "BOIS" },
-      { "noeudDepartId": 5, "noeudArriveeId": 7, "materiauId": "BOIS" }
+      {
+        "noeudDepartId": 1,
+        "noeudArriveeId": 4,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 2,
+        "noeudArriveeId": 5,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 4,
+        "noeudArriveeId": 5,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 4,
+        "noeudArriveeId": 7,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 5,
+        "noeudArriveeId": 8,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 7,
+        "noeudArriveeId": 8,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 1,
+        "noeudArriveeId": 5,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 7,
+        "noeudArriveeId": 5,
+        "materiauId": "BOIS"
+      }
     ]
   },
   {
     "niveauId": 2,
-    "description": "Tour étroite à deux colonnes, trois étages triangulés, base en béton. Atteint 7,5 m. Coût attendu : environ 406.1.",
+    "description": "Tour triangulée à 2 colonnes, 12 liens (bois). Atteint 7.5 m. Coût attendu : environ 331.1.",
     "liens": [
-      { "noeudDepartId": 101, "noeudArriveeId": 104, "materiauId": "BETON" },
-      { "noeudDepartId": 102, "noeudArriveeId": 105, "materiauId": "BETON" },
-      { "noeudDepartId": 104, "noeudArriveeId": 105, "materiauId": "BOIS" },
-      { "noeudDepartId": 101, "noeudArriveeId": 105, "materiauId": "BOIS" },
-      { "noeudDepartId": 104, "noeudArriveeId": 107, "materiauId": "BOIS" },
-      { "noeudDepartId": 105, "noeudArriveeId": 108, "materiauId": "BOIS" },
-      { "noeudDepartId": 107, "noeudArriveeId": 108, "materiauId": "BOIS" },
-      { "noeudDepartId": 105, "noeudArriveeId": 107, "materiauId": "BOIS" },
-      { "noeudDepartId": 107, "noeudArriveeId": 110, "materiauId": "BOIS" },
-      { "noeudDepartId": 108, "noeudArriveeId": 111, "materiauId": "BOIS" },
-      { "noeudDepartId": 110, "noeudArriveeId": 111, "materiauId": "BOIS" },
-      { "noeudDepartId": 107, "noeudArriveeId": 111, "materiauId": "BOIS" }
+      {
+        "noeudDepartId": 101,
+        "noeudArriveeId": 104,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 102,
+        "noeudArriveeId": 105,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 104,
+        "noeudArriveeId": 105,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 104,
+        "noeudArriveeId": 107,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 105,
+        "noeudArriveeId": 108,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 107,
+        "noeudArriveeId": 108,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 107,
+        "noeudArriveeId": 110,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 108,
+        "noeudArriveeId": 111,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 110,
+        "noeudArriveeId": 111,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 101,
+        "noeudArriveeId": 105,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 107,
+        "noeudArriveeId": 105,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 107,
+        "noeudArriveeId": 111,
+        "materiauId": "BOIS"
+      }
     ]
   },
   {
     "niveauId": 3,
-    "description": "Tour large à trois colonnes, quatre étages triangulés, base en béton. Atteint 10 m. Coût attendu : environ 895.3.",
+    "description": "Tour triangulée à 2 colonnes, 16 liens (bois). Atteint 10 m. Coût attendu : environ 441.4.",
     "liens": [
-      { "noeudDepartId": 201, "noeudArriveeId": 204, "materiauId": "BETON" },
-      { "noeudDepartId": 202, "noeudArriveeId": 205, "materiauId": "BETON" },
-      { "noeudDepartId": 203, "noeudArriveeId": 206, "materiauId": "BETON" },
-      { "noeudDepartId": 204, "noeudArriveeId": 205, "materiauId": "BOIS" },
-      { "noeudDepartId": 205, "noeudArriveeId": 206, "materiauId": "BOIS" },
-      { "noeudDepartId": 201, "noeudArriveeId": 205, "materiauId": "BOIS" },
-      { "noeudDepartId": 203, "noeudArriveeId": 205, "materiauId": "BOIS" },
-      { "noeudDepartId": 204, "noeudArriveeId": 207, "materiauId": "BOIS" },
-      { "noeudDepartId": 205, "noeudArriveeId": 208, "materiauId": "BOIS" },
-      { "noeudDepartId": 206, "noeudArriveeId": 209, "materiauId": "BOIS" },
-      { "noeudDepartId": 207, "noeudArriveeId": 208, "materiauId": "BOIS" },
-      { "noeudDepartId": 208, "noeudArriveeId": 209, "materiauId": "BOIS" },
-      { "noeudDepartId": 205, "noeudArriveeId": 207, "materiauId": "BOIS" },
-      { "noeudDepartId": 205, "noeudArriveeId": 209, "materiauId": "BOIS" },
-      { "noeudDepartId": 207, "noeudArriveeId": 210, "materiauId": "BOIS" },
-      { "noeudDepartId": 208, "noeudArriveeId": 211, "materiauId": "BOIS" },
-      { "noeudDepartId": 209, "noeudArriveeId": 212, "materiauId": "BOIS" },
-      { "noeudDepartId": 210, "noeudArriveeId": 211, "materiauId": "BOIS" },
-      { "noeudDepartId": 211, "noeudArriveeId": 212, "materiauId": "BOIS" },
-      { "noeudDepartId": 207, "noeudArriveeId": 211, "materiauId": "BOIS" },
-      { "noeudDepartId": 209, "noeudArriveeId": 211, "materiauId": "BOIS" },
-      { "noeudDepartId": 210, "noeudArriveeId": 213, "materiauId": "BOIS" },
-      { "noeudDepartId": 211, "noeudArriveeId": 214, "materiauId": "BOIS" },
-      { "noeudDepartId": 212, "noeudArriveeId": 215, "materiauId": "BOIS" },
-      { "noeudDepartId": 213, "noeudArriveeId": 214, "materiauId": "BOIS" },
-      { "noeudDepartId": 214, "noeudArriveeId": 215, "materiauId": "BOIS" },
-      { "noeudDepartId": 211, "noeudArriveeId": 213, "materiauId": "BOIS" },
-      { "noeudDepartId": 211, "noeudArriveeId": 215, "materiauId": "BOIS" }
+      {
+        "noeudDepartId": 201,
+        "noeudArriveeId": 204,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 202,
+        "noeudArriveeId": 205,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 204,
+        "noeudArriveeId": 205,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 204,
+        "noeudArriveeId": 207,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 205,
+        "noeudArriveeId": 208,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 207,
+        "noeudArriveeId": 208,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 207,
+        "noeudArriveeId": 210,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 208,
+        "noeudArriveeId": 211,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 210,
+        "noeudArriveeId": 211,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 210,
+        "noeudArriveeId": 213,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 211,
+        "noeudArriveeId": 214,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 213,
+        "noeudArriveeId": 214,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 201,
+        "noeudArriveeId": 205,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 207,
+        "noeudArriveeId": 205,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 207,
+        "noeudArriveeId": 211,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 213,
+        "noeudArriveeId": 211,
+        "materiauId": "BOIS"
+      }
+    ]
+  },
+  {
+    "niveauId": 4,
+    "description": "Tour triangulée à 3 colonnes, 24 liens (bois). Atteint 10 m. Coût attendu : environ 651.8.",
+    "liens": [
+      {
+        "noeudDepartId": 301,
+        "noeudArriveeId": 303,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 302,
+        "noeudArriveeId": 305,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 303,
+        "noeudArriveeId": 304,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 303,
+        "noeudArriveeId": 306,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 304,
+        "noeudArriveeId": 305,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 304,
+        "noeudArriveeId": 307,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 305,
+        "noeudArriveeId": 308,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 306,
+        "noeudArriveeId": 307,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 306,
+        "noeudArriveeId": 309,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 307,
+        "noeudArriveeId": 308,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 307,
+        "noeudArriveeId": 310,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 308,
+        "noeudArriveeId": 311,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 309,
+        "noeudArriveeId": 310,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 309,
+        "noeudArriveeId": 312,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 310,
+        "noeudArriveeId": 311,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 310,
+        "noeudArriveeId": 313,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 311,
+        "noeudArriveeId": 314,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 312,
+        "noeudArriveeId": 313,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 313,
+        "noeudArriveeId": 314,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 304,
+        "noeudArriveeId": 308,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 304,
+        "noeudArriveeId": 302,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 310,
+        "noeudArriveeId": 308,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 312,
+        "noeudArriveeId": 310,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 310,
+        "noeudArriveeId": 314,
+        "materiauId": "BOIS"
+      }
+    ]
+  },
+  {
+    "niveauId": 5,
+    "description": "Tour triangulée à 3 colonnes, 22 liens (bois). Atteint 10 m. Coût attendu : environ 612.1.",
+    "liens": [
+      {
+        "noeudDepartId": 401,
+        "noeudArriveeId": 404,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 402,
+        "noeudArriveeId": 405,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 403,
+        "noeudArriveeId": 406,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 404,
+        "noeudArriveeId": 405,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 404,
+        "noeudArriveeId": 407,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 405,
+        "noeudArriveeId": 406,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 406,
+        "noeudArriveeId": 408,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 407,
+        "noeudArriveeId": 409,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 408,
+        "noeudArriveeId": 411,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 409,
+        "noeudArriveeId": 410,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 409,
+        "noeudArriveeId": 412,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 410,
+        "noeudArriveeId": 411,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 410,
+        "noeudArriveeId": 413,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 411,
+        "noeudArriveeId": 414,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 412,
+        "noeudArriveeId": 413,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 413,
+        "noeudArriveeId": 414,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 405,
+        "noeudArriveeId": 403,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 407,
+        "noeudArriveeId": 410,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 407,
+        "noeudArriveeId": 405,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 412,
+        "noeudArriveeId": 410,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 410,
+        "noeudArriveeId": 414,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 410,
+        "noeudArriveeId": 408,
+        "materiauId": "BOIS"
+      }
+    ]
+  },
+  {
+    "niveauId": 6,
+    "description": "Tour triangulée à 3 colonnes, 31 liens (bois). Atteint 12.5 m. Coût attendu : environ 837.1.",
+    "liens": [
+      {
+        "noeudDepartId": 501,
+        "noeudArriveeId": 504,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 502,
+        "noeudArriveeId": 505,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 503,
+        "noeudArriveeId": 506,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 504,
+        "noeudArriveeId": 505,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 504,
+        "noeudArriveeId": 507,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 505,
+        "noeudArriveeId": 506,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 505,
+        "noeudArriveeId": 508,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 506,
+        "noeudArriveeId": 509,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 507,
+        "noeudArriveeId": 508,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 507,
+        "noeudArriveeId": 510,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 508,
+        "noeudArriveeId": 509,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 508,
+        "noeudArriveeId": 511,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 509,
+        "noeudArriveeId": 512,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 510,
+        "noeudArriveeId": 511,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 510,
+        "noeudArriveeId": 513,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 511,
+        "noeudArriveeId": 512,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 511,
+        "noeudArriveeId": 514,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 512,
+        "noeudArriveeId": 515,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 513,
+        "noeudArriveeId": 514,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 513,
+        "noeudArriveeId": 516,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 514,
+        "noeudArriveeId": 515,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 514,
+        "noeudArriveeId": 517,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 515,
+        "noeudArriveeId": 518,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 516,
+        "noeudArriveeId": 517,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 517,
+        "noeudArriveeId": 518,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 505,
+        "noeudArriveeId": 503,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 507,
+        "noeudArriveeId": 505,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 505,
+        "noeudArriveeId": 509,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 507,
+        "noeudArriveeId": 511,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 511,
+        "noeudArriveeId": 515,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 517,
+        "noeudArriveeId": 515,
+        "materiauId": "BOIS"
+      }
+    ]
+  },
+  {
+    "niveauId": 7,
+    "description": "Tour triangulée à 3 colonnes, 29 liens (béton, bois). Atteint 12.5 m. Coût attendu : environ 855.7.",
+    "liens": [
+      {
+        "noeudDepartId": 601,
+        "noeudArriveeId": 603,
+        "materiauId": "BETON"
+      },
+      {
+        "noeudDepartId": 602,
+        "noeudArriveeId": 605,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 603,
+        "noeudArriveeId": 604,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 603,
+        "noeudArriveeId": 606,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 604,
+        "noeudArriveeId": 605,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 604,
+        "noeudArriveeId": 607,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 605,
+        "noeudArriveeId": 608,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 606,
+        "noeudArriveeId": 607,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 606,
+        "noeudArriveeId": 609,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 607,
+        "noeudArriveeId": 608,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 608,
+        "noeudArriveeId": 610,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 609,
+        "noeudArriveeId": 611,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 610,
+        "noeudArriveeId": 613,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 611,
+        "noeudArriveeId": 612,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 611,
+        "noeudArriveeId": 614,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 612,
+        "noeudArriveeId": 613,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 612,
+        "noeudArriveeId": 615,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 613,
+        "noeudArriveeId": 616,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 614,
+        "noeudArriveeId": 615,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 615,
+        "noeudArriveeId": 616,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 601,
+        "noeudArriveeId": 604,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 603,
+        "noeudArriveeId": 607,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 607,
+        "noeudArriveeId": 605,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 604,
+        "noeudArriveeId": 602,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 609,
+        "noeudArriveeId": 612,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 609,
+        "noeudArriveeId": 607,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 614,
+        "noeudArriveeId": 612,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 612,
+        "noeudArriveeId": 616,
+        "materiauId": "BOIS"
+      },
+      {
+        "noeudDepartId": 612,
+        "noeudArriveeId": 610,
+        "materiauId": "BOIS"
+      }
     ]
   }
 ]
