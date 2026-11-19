@@ -18,8 +18,8 @@ describe('avancer', () => {
     expect(avancer(etat, 'lienPose')).toEqual({ index: iDiagonales + 1, compte: 0 })
   })
 
-  it('parcourt les six étapes dans l\'ordre puis se termine', () => {
-    const evenements = ['materiauChoisi', 'lienPose', 'hauteurAtteinte', 'lienPose', 'lienPose', 'lienPose', 'lienPose', 'suivant', 'simulationLancee']
+  it('parcourt les cinq étapes dans l\'ordre puis se termine', () => {
+    const evenements = ['materiauChoisi', 'lienPose', 'lienPose', 'lienPose', 'lienPose', 'lienPose', 'suivant', 'simulationLancee']
     const etat = evenements.reduce(avancer, etatInitial)
     expect(estTermine(etat)).toBe(true)
     expect(avancer(etat, 'suivant')).toBe(etat)

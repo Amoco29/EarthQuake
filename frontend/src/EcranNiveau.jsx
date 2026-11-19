@@ -43,12 +43,6 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const cout = niveau ? coutTotal(liens, niveau, parId) : 0
   const hauteur = niveau ? hauteurAtteinte(liens, niveau) : 0
 
-  const hauteurOk = niveau ? hauteur >= niveau.hauteurMinRequise : false
-  // Dépend de l'étape : la hauteur peut être atteinte avant que l'étape qui l'attend soit affichée.
-  useEffect(() => {
-    if (hauteurOk) evenement('hauteurAtteinte')
-  }, [hauteurOk, tuto.index, evenement])
-
   const echelle = niveau && espace.hauteur > 0 ? calculerEchelle(niveau, espace) : PIXELS_PAR_METRE
 
   // À l'échec, après la secousse : le (ou les) premier lien cassé clignote sur le canvas.
@@ -95,6 +89,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   if (!niveau) return <main>Chargement…</main>
 
   const budgetDepasse = cout > niveau.budgetMax
+  const hauteurOk = hauteur >= niveau.hauteurMinRequise
   const etapeTuto = estTutoriel(niveau) && !estTermine(tuto) ? etapesTuto[tuto.index] : null
 
   return (
