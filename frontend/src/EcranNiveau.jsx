@@ -73,6 +73,12 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
     }
   }
 
+  function revoirTuto() {
+    setTuto(etatInitial)
+    setLiens([])
+    recommencer()
+  }
+
   function recommencer() {
     setResultat(null)
     setAnimationFinie(false)
@@ -99,6 +105,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         <h1>
           Niveau {niveau.numero} : {niveau.nom}
         </h1>
+        {estTutoriel(niveau) && !etapeTuto && <button onClick={revoirTuto}>Revoir le tutoriel</button>}
         <div className="indicateurs">
           <span data-tuto="budget" className={budgetDepasse ? 'mauvais' : ''}>
             Budget : {cout.toFixed(0)} / {niveau.budgetMax}

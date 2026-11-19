@@ -10,6 +10,7 @@ function App() {
   const [erreur, setErreur] = useState(null)
   const [niveauOuvert, setNiveauOuvert] = useState(null) // null = on est sur la carte
   const [scores, setScores] = useState({}) // état du jeu en mémoire : perdu au rechargement de la page
+  const [tutoVu, setTutoVu] = useState(false) // proposition du tutoriel déjà traitée (en mémoire aussi)
 
   const charger = useCallback(() => {
     setErreur(null)
@@ -42,7 +43,15 @@ function App() {
   if (!donnees) return <main>Chargement…</main>
 
   if (niveauOuvert === null) {
-    return <EcranCarte niveaux={donnees.niveaux} scores={scores} onChoisir={setNiveauOuvert} />
+    return (
+      <EcranCarte
+        niveaux={donnees.niveaux}
+        scores={scores}
+        tutoVu={tutoVu}
+        onTutoVu={() => setTutoVu(true)}
+        onChoisir={setNiveauOuvert}
+      />
+    )
   }
 
   const index = donnees.niveaux.findIndex((n) => n.id === niveauOuvert)
