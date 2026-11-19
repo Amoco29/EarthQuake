@@ -153,6 +153,15 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         </div>
 
         <section className="colonne-resultat">
+          {etapeTuto && (
+            <Tutoriel
+              etape={etapeTuto}
+              numero={tuto.index + 1}
+              total={etapesTuto.length}
+              onSuivant={() => evenement('suivant')}
+              onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
+            />
+          )}
           {!resultat && (
             <div className="actions">
               <button data-tuto="bouton-seisme" onClick={simuler} disabled={enCours || liens.length === 0}>
@@ -199,16 +208,6 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           )}
         </section>
       </div>
-
-      {etapeTuto && (
-        <Tutoriel
-          etape={etapeTuto}
-          numero={tuto.index + 1}
-          total={etapesTuto.length}
-          onSuivant={() => evenement('suivant')}
-          onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
-        />
-      )}
     </main>
   )
 }

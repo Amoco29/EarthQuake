@@ -71,7 +71,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .etape small { margin-top: 4px; font-family: var(--police-texte); font-size: 0.875rem; }
 
 /* Tutoriel : bulle fixe en bas et halo sur l'élément visé */
-.bulle-tuto { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); max-width: min(480px, 90vw); background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 10px 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); z-index: 10; }
+/* Dans la colonne de droite : ne cache pas les nœuds du bas */
+.bulle-tuto { margin-bottom: 12px; background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 10px 14px; }
 .bulle-tuto p { margin: 4px 0; font-size: 0.9375rem; }
 .bulle-tuto .etape-tuto { font-family: var(--police-titre); font-size: 0.8rem; }
 [data-tuto-actif='panneau-materiaux'] [data-tuto='panneau-materiaux'],
