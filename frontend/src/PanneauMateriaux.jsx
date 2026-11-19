@@ -1,7 +1,7 @@
 /** Panneau des matériaux : on prend une pièce en appuyant dessus, puis on la glisse sur la structure. Seuls les matériaux autorisés dans le niveau sont affichés. */
 export default function PanneauMateriaux({ materiaux, autorises, onPrendre }) {
   return (
-    <aside className="panneau-materiaux" aria-label="Matériaux">
+    <aside className="panneau-materiaux" data-tuto="panneau-materiaux" aria-label="Matériaux">
       <h2>Matériaux</h2>
       {materiaux
         .filter((m) => autorises.includes(m.id))

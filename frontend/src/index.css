@@ -69,3 +69,14 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .etape { display: flex; flex-direction: column; align-items: flex-start; border: 3px solid #333; padding: 12px 20px; min-width: 200px; }
 .etape.reussi { border-color: #1b7f3b; }
 .etape small { margin-top: 4px; font-family: var(--police-texte); font-size: 0.875rem; }
+
+/* Tutoriel : bulle fixe en bas et halo sur l'élément visé */
+.bulle-tuto { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); max-width: min(480px, 90vw); background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 10px 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); z-index: 10; }
+.bulle-tuto p { margin: 4px 0; font-size: 0.9375rem; }
+.bulle-tuto .etape-tuto { font-family: var(--police-titre); font-size: 0.8rem; }
+[data-tuto-actif='panneau-materiaux'] [data-tuto='panneau-materiaux'],
+[data-tuto-actif='zone-construction'] [data-tuto='zone-construction'],
+[data-tuto-actif='budget'] [data-tuto='budget'],
+[data-tuto-actif='bouton-seisme'] [data-tuto='bouton-seisme'] { outline: 3px solid #e0a800; outline-offset: 2px; animation: halo-tuto 1.2s ease-in-out infinite; }
+@keyframes halo-tuto { 50% { box-shadow: 0 0 14px 4px rgba(224, 168, 0, 0.8); } }
+@media (prefers-reduced-motion: reduce) { [data-tuto-actif] [data-tuto] { animation: none !important; } }

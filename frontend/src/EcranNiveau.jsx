@@ -6,6 +6,9 @@ import MessageErreur from './MessageErreur.jsx'
 import { calculerEchelle, PIXELS_PAR_METRE } from './geometrie.js'
 import NiveauCanvas from './NiveauCanvas.jsx'
 import PanneauMateriaux from './PanneauMateriaux.jsx'
+import { estTutoriel } from './progression.js'
+import Tutoriel from './Tutoriel.jsx'
+import { avancer, estTermine, etapesTuto, etatInitial } from './tutoriel.js'
 import { useTaille } from './useTaille.js'
 
 export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVictoire, onChoisirNiveau }) {
@@ -20,6 +23,8 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const [avertissement, setAvertissement] = useState(null) // ex : lien refusé car trop long
   const [zone, setZone] = useState(null) // élément qui contient le canvas : sa taille donne l'échelle
   const espace = useTaille(zone)
+  const [tuto, setTuto] = useState(etatInitial)
+  const evenement = useCallback((nom) => setTuto((t) => avancer(t, nom)), [])
 
   useEffect(() => {
     let annule = false
@@ -37,6 +42,12 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const parId = useMemo(() => Object.fromEntries(materiaux.map((m) => [m.id, m])), [materiaux])
   const cout = niveau ? coutTotal(liens, niveau, parId) : 0
   const hauteur = niveau ? hauteurAtteinte(liens, niveau) : 0
+
+  const hauteurOk = niveau ? hauteur >= niveau.hauteurMinRequise : false
+  // Dépend de l'étape : la hauteur peut être atteinte avant que l'étape qui l'attend soit affichée.
+  useEffect(() => {
+    if (hauteurOk) evenement('hauteurAtteinte')
+  }, [hauteurOk, tuto.index, evenement])
 
   const echelle = niveau && espace.hauteur > 0 ? calculerEchelle(niveau, espace) : PIXELS_PAR_METRE
 
@@ -57,6 +68,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
     setAvertissement(null)
     setErreurSimulation(null)
     setEnCours(true)
+    evenement('simulationLancee')
     try {
       setAnimationFinie(false)
       setResultat(await simulerNiveau(id, liens))
@@ -83,17 +95,17 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   if (!niveau) return <main>Chargement…</main>
 
   const budgetDepasse = cout > niveau.budgetMax
-  const hauteurOk = hauteur >= niveau.hauteurMinRequise
+  const etapeTuto = estTutoriel(niveau) && !estTermine(tuto) ? etapesTuto[tuto.index] : null
 
   return (
-    <main className="jeu">
+    <main className="jeu" data-tuto-actif={etapeTuto?.cible}>
       <header className="entete">
         <button onClick={onRetour}>← Carte</button>
         <h1>
           Niveau {niveau.numero} : {niveau.nom}
         </h1>
         <div className="indicateurs">
-          <span className={budgetDepasse ? 'mauvais' : ''}>
+          <span data-tuto="budget" className={budgetDepasse ? 'mauvais' : ''}>
             Budget : {cout.toFixed(0)} / {niveau.budgetMax}
           </span>
           <span className={hauteurOk ? 'bon' : ''}>
@@ -106,10 +118,14 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         <PanneauMateriaux
           materiaux={materiaux}
           autorises={niveau.materiauxAutorises}
-          onPrendre={(materiauId, e) => !resultat && setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })}
+          onPrendre={(materiauId, e) => {
+            if (resultat) return
+            setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })
+            evenement('materiauChoisi')
+          }}
         />
 
-        <div className="zone-canvas" ref={setZone}>
+        <div className="zone-canvas" data-tuto="zone-construction" ref={setZone}>
           <NiveauCanvas
             niveau={niveau}
             echelle={echelle}
@@ -121,6 +137,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             surlignes={surlignes}
             onLien={(a, b, materiauId) => {
               setAvertissement(null)
+              evenement('lienPose')
               setLiens((l) => ajouterLien(l, a, b, materiauId, niveau, parId[materiauId]))
             }}
             onPieceFinie={() => setPiece(null)}
@@ -136,7 +153,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         <section className="colonne-resultat">
           {!resultat && (
             <div className="actions">
-              <button onClick={simuler} disabled={enCours || liens.length === 0}>
+              <button data-tuto="bouton-seisme" onClick={simuler} disabled={enCours || liens.length === 0}>
                 Lancer le séisme
               </button>
               <button onClick={() => setLiens([])} disabled={liens.length === 0}>
@@ -175,6 +192,16 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           )}
         </section>
       </div>
+
+      {etapeTuto && (
+        <Tutoriel
+          etape={etapeTuto}
+          numero={tuto.index + 1}
+          total={etapesTuto.length}
+          onSuivant={() => evenement('suivant')}
+          onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
+        />
+      )}
     </main>
   )
 }
