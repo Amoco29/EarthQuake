@@ -27,11 +27,11 @@ class ChargeurNiveauxTests {
 	private ChargeurNiveaux chargeur;
 
 	@Test
-	void chargeLesTroisNiveauxEtTousLeursNoeudsAuDemarrage() {
-		assertThat(niveaux.count()).isEqualTo(3);
+	void chargeLesSeptNiveauxEtLeursNoeudsAuDemarrage() {
+		assertThat(niveaux.count()).isEqualTo(7);
 		assertThat(niveaux.findById(1L).orElseThrow().getNoeuds()).hasSize(12);
 		assertThat(niveaux.findById(2L).orElseThrow().getNoeuds()).hasSize(15);
-		assertThat(niveaux.findById(3L).orElseThrow().getNoeuds()).hasSize(18);
+		assertThat(niveaux.findById(3L).orElseThrow().getNoeuds()).hasSize(15);
 	}
 
 	@Test
@@ -40,9 +40,9 @@ class ChargeurNiveauxTests {
 
 		assertThat(prairie.getNom()).isEqualTo("La prairie");
 		assertThat(prairie.getThemeDecor()).isEqualTo("prairie");
-		assertThat(prairie.getBudgetMax()).isEqualTo(400);
+		assertThat(prairie.getBudgetMax()).isEqualTo(350);
 		assertThat(prairie.getHauteurMinRequise()).isEqualTo(5);
-		assertThat(prairie.getMateriauxAutorises()).containsExactlyInAnyOrder("BOIS", "BETON", "ACIER");
+		assertThat(prairie.getMateriauxAutorises()).containsExactly("BOIS");
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class ChargeurNiveauxTests {
 		assertThatThrownBy(() -> chargeur.charger(new ByteArrayInputStream(horsZone.getBytes(StandardCharsets.UTF_8))))
 				.isInstanceOf(ExceptionMetier.class)
 				.satisfies(e -> assertThat(((ExceptionMetier) e).getCodeErreur()).isEqualTo(CodeErreur.NIV_002));
-		assertThat(niveaux.count()).isEqualTo(3);
+		assertThat(niveaux.count()).isEqualTo(7);
 		assertThat(niveaux.findById(9L)).isEmpty();
 	}
 }

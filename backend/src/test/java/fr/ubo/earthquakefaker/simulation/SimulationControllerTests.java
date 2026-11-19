@@ -18,8 +18,8 @@ class SimulationControllerTests {
 
 	private static final String SOLUTION_NIVEAU_1 = """
 			{"liens":[
-			 {"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BETON"},
-			 {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BETON"},
+			 {"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BOIS"},
+			 {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BOIS"},
 			 {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"BOIS"},
 			 {"noeudDepartId":1,"noeudArriveeId":5,"materiauId":"BOIS"},
 			 {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"BOIS"},
@@ -51,8 +51,8 @@ class SimulationControllerTests {
 	void unePerteDansLeSeismeResteUneReponse200() throws Exception {
 		// Sans diagonales : mécanisme, la structure s'effondre mais la requête est valide.
 		mvc.perform(simuler("1", """
-				{"liens":[{"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BETON"},
-				          {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BETON"},
+				{"liens":[{"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"BOIS"},
+				          {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"BOIS"},
 				          {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"BOIS"},
 				          {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"BOIS"},
 				          {"noeudDepartId":5,"noeudArriveeId":8,"materiauId":"BOIS"},
@@ -77,8 +77,8 @@ class SimulationControllerTests {
 
 	@Test
 	void uneDiagonaleEnBetonDonneMat003() throws Exception {
-		// 1 (0 ; 0) à 5 (2,5 ; 2,5) : 3,54 m, au-delà des 2,5 m du béton
-		mvc.perform(simuler("1", "{\"liens\":[{\"noeudDepartId\":1,\"noeudArriveeId\":5,\"materiauId\":\"BETON\"}]}"))
+		// niveau 2 : 101 (0 ; 0) à 105 (2,5 ; 2,5) : 3,54 m, au-delà des 2,5 m du béton
+		mvc.perform(simuler("2", "{\"liens\":[{\"noeudDepartId\":101,\"noeudArriveeId\":105,\"materiauId\":\"BETON\"}]}"))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("MAT-003"));
 	}
 
@@ -103,12 +103,20 @@ class SimulationControllerTests {
 
 	@Test
 	void unBudgetDepasseDonneBud001() throws Exception {
-		mvc.perform(simuler("1", """
-				{"liens":[{"noeudDepartId":1,"noeudArriveeId":4,"materiauId":"ACIER"},
-				          {"noeudDepartId":2,"noeudArriveeId":5,"materiauId":"ACIER"},
-				          {"noeudDepartId":4,"noeudArriveeId":7,"materiauId":"ACIER"},
-				          {"noeudDepartId":5,"noeudArriveeId":8,"materiauId":"ACIER"},
-				          {"noeudDepartId":4,"noeudArriveeId":5,"materiauId":"ACIER"}]}"""))
+		// niveau 2 (budget 500) : 30 m de béton à 25 le mètre = 750
+		mvc.perform(simuler("2", """
+				{"liens":[{"noeudDepartId":101,"noeudArriveeId":104,"materiauId":"BETON"},
+				          {"noeudDepartId":104,"noeudArriveeId":107,"materiauId":"BETON"},
+				          {"noeudDepartId":107,"noeudArriveeId":110,"materiauId":"BETON"},
+				          {"noeudDepartId":110,"noeudArriveeId":113,"materiauId":"BETON"},
+				          {"noeudDepartId":102,"noeudArriveeId":105,"materiauId":"BETON"},
+				          {"noeudDepartId":105,"noeudArriveeId":108,"materiauId":"BETON"},
+				          {"noeudDepartId":108,"noeudArriveeId":111,"materiauId":"BETON"},
+				          {"noeudDepartId":111,"noeudArriveeId":114,"materiauId":"BETON"},
+				          {"noeudDepartId":104,"noeudArriveeId":105,"materiauId":"BETON"},
+				          {"noeudDepartId":107,"noeudArriveeId":108,"materiauId":"BETON"},
+				          {"noeudDepartId":110,"noeudArriveeId":111,"materiauId":"BETON"},
+				          {"noeudDepartId":113,"noeudArriveeId":114,"materiauId":"BETON"}]}"""))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.codeErreur").value("BUD-001"));
 	}
 

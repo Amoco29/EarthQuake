@@ -29,12 +29,12 @@ class NiveauControllerTests {
 				.andExpect(jsonPath("$.numero").value(1))
 				.andExpect(jsonPath("$.nom").value("La prairie"))
 				.andExpect(jsonPath("$.themeDecor").value("prairie"))
-				.andExpect(jsonPath("$.budgetMax").value(400.0))
+				.andExpect(jsonPath("$.budgetMax").value(350.0))
 				.andExpect(jsonPath("$.hauteurMinRequise").value(5.0))
 				.andExpect(jsonPath("$.largeurZone").value(5.0))
 				.andExpect(jsonPath("$.hauteurZone").value(10.0))
 				.andExpect(jsonPath("$.longueurMaxLien").value(org.hamcrest.Matchers.closeTo(3.5355, 0.001)))
-				.andExpect(jsonPath("$.materiauxAutorises.length()").value(3))
+				.andExpect(jsonPath("$.materiauxAutorises.length()").value(1))
 				.andExpect(jsonPath("$.noeuds.length()").value(12));
 	}
 
@@ -59,7 +59,7 @@ class NiveauControllerTests {
 	@Test
 	void chaqueNiveauDuFichierEstAccessible() throws Exception {
 		mvc.perform(get("/api/niveaux/2")).andExpect(status().isOk()).andExpect(jsonPath("$.noeuds.length()").value(15));
-		mvc.perform(get("/api/niveaux/3")).andExpect(status().isOk()).andExpect(jsonPath("$.noeuds.length()").value(18));
+		mvc.perform(get("/api/niveaux/3")).andExpect(status().isOk()).andExpect(jsonPath("$.noeuds.length()").value(15));
 	}
 
 	@Test
@@ -102,7 +102,7 @@ class NiveauControllerTests {
 	void listeLesNiveauxParNumeroPourLaCarte() throws Exception {
 		mvc.perform(get("/api/niveaux"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.length()").value(3))
+				.andExpect(jsonPath("$.length()").value(7))
 				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].nom").value("La prairie"))
 				.andExpect(jsonPath("$[2].numero").value(3))
