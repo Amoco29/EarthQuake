@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { chargerMateriaux, chargerNiveaux } from './api.js'
 import EcranCarte from './EcranCarte.jsx'
 import EcranNiveau from './EcranNiveau.jsx'
+import { estTutoriel } from './progression.js'
 import MessageErreur from './MessageErreur.jsx'
 
 function App() {
@@ -22,8 +23,11 @@ function App() {
   }, [charger])
 
   const enregistrerVictoire = useCallback(
-    (id, score) => setScores((s) => ({ ...s, [id]: Math.max(s[id] ?? 0, score) })),
-    [],
+    (id, score) => {
+      if (estTutoriel(donnees.niveaux.find((n) => n.id === id))) return // le tutoriel ne compte pas
+      setScores((s) => ({ ...s, [id]: Math.max(s[id] ?? 0, score) }))
+    },
+    [donnees],
   )
 
   if (erreur) {
