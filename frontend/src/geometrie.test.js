@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculerEchelle, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres } from './geometrie.js'
+import { calculerEchelle, cibleDePiece, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres } from './geometrie.js'
 
 const niveau = { largeurZone: 5, hauteurZone: 10 }
 
@@ -103,5 +103,32 @@ describe('pixelsVersMetres', () => {
     const retour = pixelsVersMetres(x, y, niveau, 64)
     expect(retour.x).toBeCloseTo(3.5)
     expect(retour.y).toBeCloseTo(7.25)
+  })
+})
+
+describe('cibleDePiece', () => {
+  const grille = {
+    largeurZone: 5,
+    hauteurZone: 10,
+    longueurMaxLien: 3.54,
+    noeuds: [
+      { id: 1, posX: 0, posY: 0 },
+      { id: 2, posX: 2.5, posY: 0 },
+      { id: 3, posX: 0, posY: 5 },
+    ],
+  }
+
+  it('aimante sur la paire voisine dont le milieu est le plus proche', () => {
+    const milieu = metresVersPixels(1.25, 0, grille, 10, 30)
+    expect(cibleDePiece(milieu.x, milieu.y, grille, 10)).toEqual({ departId: 1, arriveeId: 2 })
+  })
+
+  it('ignore les paires trop éloignées pour la grille', () => {
+    const milieu = metresVersPixels(0, 2.5, grille, 10, 30) // milieu des nœuds 1 et 3, distance 5 m
+    expect(cibleDePiece(milieu.x, milieu.y, grille, 10)).toBeNull()
+  })
+
+  it('ne cible rien quand la pièce est loin de la structure', () => {
+    expect(cibleDePiece(500, 500, grille, 10)).toBeNull()
   })
 })

@@ -49,8 +49,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 .panneau-materiaux { flex: none; display: flex; flex-direction: column; gap: 6px; width: 190px; overflow-y: auto; }
 .panneau-materiaux h2 { margin: 0 0 4px; }
-.materiau { display: flex; align-items: center; gap: 8px; text-align: left; border: 2px solid #999; background: #fff; }
-.materiau.choisi { border-color: #1b6ec2; background: #e6f0fb; }
+.materiau { cursor: grab; touch-action: none; user-select: none; display: flex; align-items: center; gap: 8px; text-align: left; border: 2px solid #999; background: #fff; }
 .materiau small { margin-left: auto; color: #555; font-family: var(--police-texte); font-size: 0.875rem; }
 .pastille { width: 14px; height: 14px; border: 1px solid #333; display: inline-block; }
 .aide { font-size: 0.875rem; color: #444; margin: 4px 0; }

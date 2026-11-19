@@ -1,26 +1,34 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { animationTerminee, DUREE_ANIMATION } from './animation.js'
 import { dessinerScene, POLICE } from './dessin.js'
-import { lienAutorise, limiteLien } from './construction.js'
-import { dimensionsCanvas, lienSous, noeudSous, pixelsVersMetres } from './geometrie.js'
+import { lienAutorise } from './construction.js'
+import { cibleDePiece, dimensionsCanvas, lienSous } from './geometrie.js'
 
 /**
- * Canvas du niveau. En construction : glisser d'un nœud à un autre pose un lien du matériau choisi,
- * cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
+ * Canvas du niveau. En construction : `piece` ({ materiauId, clientX, clientY }) est la pièce que le joueur tient,
+ * prise dans le panneau ; elle s'aimante sur deux nœuds voisins et se pose au relâchement (`onLien`, ou `onRefus`),
+ * puis `onPieceFinie` la rend. Cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
  * ensuite (`termine`), les liens `surlignes` clignotent. Un lien trop long est tracé en rouge et refusé (`onRefus`).
  */
-export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materiauChoisi, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, materiaux, liens, piece, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
   const ref = useRef(null)
-  const [drag, setDrag] = useState(null)
+  const [curseur, setCurseur] = useState(null) // position de la pièce tenue, en pixels du canvas
   // Débuts des animations, gardés hors de l'effet : un redimensionnement ne doit pas les relancer.
   const debuts = useRef({ secousse: null, clignote: null })
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
+
+  const drag = useMemo(() => {
+    if (!piece || !curseur) return null
+    const paire = cibleDePiece(curseur.x, curseur.y, niveau, echelle)
+    const cible = paire && { ...paire, ...lienAutorise(paire.departId, paire.arriveeId, niveau, materiaux[piece.materiauId]) }
+    return { materiauId: piece.materiauId, ...curseur, cible }
+  }, [piece, curseur, niveau, echelle, materiaux])
 
   useEffect(() => {
     let annule = false
     let image = 0
     const ctx = ref.current.getContext('2d')
-    const scene = { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, surlignes }
+    const scene = { niveau, echelle, materiaux, liens, drag, resultat, surlignes }
 
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
@@ -60,55 +68,47 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
       annule = true
       cancelAnimationFrame(image)
     }
-  }, [niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, termine, surlignes, onFin])
+  }, [niveau, echelle, materiaux, liens, drag, resultat, termine, surlignes, onFin])
 
-  function position(e) {
+  const versCanvas = (e) => {
     const rect = ref.current.getBoundingClientRect()
-    return {
-      x: ((e.clientX - rect.left) * largeur) / rect.width,
-      y: ((e.clientY - rect.top) * hauteur) / rect.height,
-    }
+    return { x: ((e.clientX - rect.left) * largeur) / rect.width, y: ((e.clientY - rect.top) * hauteur) / rect.height }
   }
+
+  // Pendant que la pièce est tenue, on suit le pointeur sur toute la fenêtre : le relâchement peut avoir lieu hors du canvas.
+  useEffect(() => {
+    if (!piece) {
+      setCurseur(null)
+      return undefined
+    }
+    setCurseur(versCanvas(piece))
+    const deplacer = (e) => setCurseur(versCanvas(e))
+    const relacher = (e) => {
+      const { x, y } = versCanvas(e)
+      const paire = cibleDePiece(x, y, niveau, echelle)
+      if (paire) {
+        const verdict = lienAutorise(paire.departId, paire.arriveeId, niveau, materiaux[piece.materiauId])
+        if (verdict.ok) onLien(paire.departId, paire.arriveeId, piece.materiauId)
+        else onRefus?.(verdict.message)
+      }
+      onPieceFinie()
+    }
+    window.addEventListener('pointermove', deplacer)
+    window.addEventListener('pointerup', relacher)
+    window.addEventListener('pointercancel', onPieceFinie)
+    return () => {
+      window.removeEventListener('pointermove', deplacer)
+      window.removeEventListener('pointerup', relacher)
+      window.removeEventListener('pointercancel', onPieceFinie)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [piece])
 
   function enfoncer(e) {
-    if (resultat) return
-    const { x, y } = position(e)
-    const noeud = noeudSous(x, y, niveau, echelle)
-    if (noeud) {
-      ref.current.setPointerCapture(e.pointerId)
-      setDrag({ departId: noeud.id, x, y, refuse: false })
-      return
-    }
+    if (resultat || piece) return
+    const { x, y } = versCanvas(e)
     const lien = lienSous(x, y, liens, niveau, echelle)
     if (lien) onSupprimer(lien.noeudDepartId, lien.noeudArriveeId)
-  }
-
-  /** Vrai si la cible du tracé (le nœud survolé, sinon le pointeur) est trop loin du nœud de départ. */
-  function tropLoin(departId, x, y) {
-    const cible = noeudSous(x, y, niveau, echelle)
-    const depart = niveau.noeuds.find((n) => n.id === departId)
-    const materiau = materiaux[materiauChoisi]
-    if (cible) return cible.id !== departId && !lienAutorise(departId, cible.id, niveau, materiau).ok
-    const point = pixelsVersMetres(x, y, niveau, echelle)
-    return Math.hypot(point.x - depart.posX, point.y - depart.posY) > limiteLien(niveau, materiau)
-  }
-
-  function deplacer(e) {
-    if (!drag) return
-    const { x, y } = position(e)
-    setDrag({ ...drag, x, y, refuse: tropLoin(drag.departId, x, y) })
-  }
-
-  function relacher(e) {
-    if (!drag) return
-    const { x, y } = position(e)
-    const noeud = noeudSous(x, y, niveau, echelle)
-    if (noeud && noeud.id !== drag.departId) {
-      const verdict = lienAutorise(drag.departId, noeud.id, niveau, materiaux[materiauChoisi])
-      if (verdict.ok) onLien(drag.departId, noeud.id)
-      else onRefus?.(verdict.message)
-    }
-    setDrag(null)
   }
 
   return (
@@ -116,12 +116,9 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, materi
       ref={ref}
       width={largeur}
       height={hauteur}
-      style={{ touchAction: 'none', maxWidth: '100%', cursor: resultat ? 'default' : 'crosshair' }}
+      style={{ touchAction: 'none', maxWidth: '100%', cursor: 'default' }}
       aria-label={`Niveau ${niveau.nom}`}
       onPointerDown={enfoncer}
-      onPointerMove={deplacer}
-      onPointerUp={relacher}
-      onPointerCancel={() => setDrag(null)}
     />
   )
 }

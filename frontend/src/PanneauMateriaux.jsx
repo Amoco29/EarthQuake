@@ -1,5 +1,5 @@
-/** Panneau de choix du matériau. Les matériaux non autorisés dans le niveau sont affichés verrouillés. */
-export default function PanneauMateriaux({ materiaux, autorises, choisi, onChoisir }) {
+/** Panneau des matériaux : on prend une pièce en appuyant dessus, puis on la glisse sur la structure. Les matériaux non autorisés sont verrouillés. */
+export default function PanneauMateriaux({ materiaux, autorises, onPrendre }) {
   return (
     <aside className="panneau-materiaux" aria-label="Matériaux">
       <h2>Matériaux</h2>
@@ -8,10 +8,9 @@ export default function PanneauMateriaux({ materiaux, autorises, choisi, onChois
         return (
           <button
             key={m.id}
-            className={`materiau${choisi === m.id ? ' choisi' : ''}`}
+            className="materiau"
             disabled={!libre}
-            onClick={() => onChoisir(m.id)}
-            aria-pressed={choisi === m.id}
+            onPointerDown={(e) => onPrendre(m.id, e)}
           >
             <span className="pastille" style={{ background: m.couleurHex }} />
             {m.nom}
@@ -20,7 +19,7 @@ export default function PanneauMateriaux({ materiaux, autorises, choisi, onChois
         )
       })}
       <p className="aide">
-        Choisis un matériau, puis glisse d&apos;un nœud à un autre. Clique sur un lien pour l&apos;enlever.
+        Glisse une pièce sur deux nœuds voisins : ses bouts s&apos;aimantent sur les nœuds. Clique sur un lien pour l&apos;enlever.
       </p>
       <p className="aide">Astuce : un carré se déforme, un triangle tient. Ajoute des diagonales.</p>
     </aside>

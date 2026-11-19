@@ -36,10 +36,11 @@ function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angl
 }
 
 /**
- * scene : { niveau, materiaux, liens, drag, materiauChoisi, resultat, temps }
+ * scene : { niveau, materiaux, liens, drag, resultat, temps }
+ * `drag` : pièce tenue par le joueur { materiauId, x, y, cible: { departId, arriveeId, ok } | null }
  * `resultat` + `temps` : mode séisme (couleurs de stress, secousse, liens cassés).
  */
-export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, materiauChoisi, resultat, temps, surlignes = [] }) {
+export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, resultat, temps, surlignes = [] }) {
   const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
   ctx.clearRect(0, 0, largeur, hauteur)
 
@@ -86,20 +87,6 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, ma
     }
   }
 
-  // Lien en cours de tracé
-  if (drag) {
-    const depart = pixels(noeuds[drag.departId], niveau, echelle)
-    ctx.strokeStyle = drag.refuse ? '#e60000' : (materiaux[materiauChoisi]?.couleurHex ?? '#000')
-    ctx.lineWidth = drag.refuse ? 5 : 3
-    ctx.setLineDash([4, 4])
-    ctx.beginPath()
-    ctx.moveTo(depart.x, depart.y)
-    ctx.lineTo(drag.x, drag.y)
-    ctx.stroke()
-    ctx.setLineDash([])
-    ctx.lineWidth = 1
-  }
-
   // Nœuds : cercle, ou triangle pour un ancrage au sol
   for (const noeud of niveau.noeuds) {
     const { x, y } = pixels(noeud, niveau, echelle)
@@ -117,7 +104,34 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, ma
     ctx.fill()
   }
 
+  if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle)
   dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, temps)
+  ctx.restore()
+}
+
+/**
+ * Pièce en cours de glisser : longueur fixe du matériau, avec un nœud virtuel à chaque bout.
+ * Sans cible elle suit le pointeur ; avec une cible elle s'aligne sur les deux nœuds (verts si la pose est permise, rouges sinon).
+ */
+function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle) {
+  const materiau = materiaux[drag.materiauId]
+  const demi = ((materiau?.longueurMax ?? 2.5) * echelle) / 2
+  const { cible } = drag
+  const a = cible ? pixels(noeuds[cible.departId], niveau, echelle) : { x: drag.x - demi, y: drag.y }
+  const b = cible ? pixels(noeuds[cible.arriveeId], niveau, echelle) : { x: drag.x + demi, y: drag.y }
+  ctx.save()
+  ctx.globalAlpha = 0.85
+  dessinerRectangle(ctx, a, b, 0, 1, materiau?.couleurHex ?? '#000', largeurLien(echelle))
+  ctx.globalAlpha = 1
+  ctx.strokeStyle = !cible ? '#333' : cible.ok ? '#1a9c3a' : '#e60000'
+  ctx.lineWidth = 3
+  for (const p of [a, b]) {
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, rayonNoeud(echelle) + 3, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'
+    ctx.fill()
+    ctx.stroke()
+  }
   ctx.restore()
 }
 

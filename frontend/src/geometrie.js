@@ -67,3 +67,29 @@ export function lienSous(px, py, liens, niveau, echelle = PIXELS_PAR_METRE, seui
   }
   return meilleur
 }
+
+/**
+ * Paire de nœuds voisins (distance <= longueurMaxLien) sur laquelle aimanter une pièce tenue au point (px, py) :
+ * celle dont le milieu est le plus proche, à moins de `rayon` pixels (par défaut une demi-maille de la grille).
+ */
+export function cibleDePiece(px, py, niveau, echelle = PIXELS_PAR_METRE, rayon = 1.25 * echelle) {
+  const maxGrille = niveau.longueurMaxLien ?? Infinity
+  const { noeuds } = niveau
+  let meilleure = null
+  let distanceMin = rayon
+  for (let i = 0; i < noeuds.length; i++) {
+    for (let j = i + 1; j < noeuds.length; j++) {
+      const a = noeuds[i]
+      const b = noeuds[j]
+      if (Math.hypot(a.posX - b.posX, a.posY - b.posY) > maxGrille + 1e-9) continue
+      const pa = metresVersPixels(a.posX, a.posY, niveau, echelle)
+      const pb = metresVersPixels(b.posX, b.posY, niveau, echelle)
+      const d = Math.hypot(px - (pa.x + pb.x) / 2, py - (pa.y + pb.y) / 2)
+      if (d <= distanceMin) {
+        meilleure = { departId: a.id, arriveeId: b.id }
+        distanceMin = d
+      }
+    }
+  }
+  return meilleure
+}

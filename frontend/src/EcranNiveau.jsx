@@ -12,7 +12,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const [niveau, setNiveau] = useState(null)
   const [erreur, setErreur] = useState(null)
   const [liens, setLiens] = useState([])
-  const [choisi, setChoisi] = useState(null)
+  const [piece, setPiece] = useState(null) // pièce tenue : { materiauId, clientX, clientY }
   const [resultat, setResultat] = useState(null)
   const [animationFinie, setAnimationFinie] = useState(false)
   const [erreurSimulation, setErreurSimulation] = useState(null)
@@ -27,7 +27,6 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
       .then((n) => {
         if (annule) return
         setNiveau(n)
-        setChoisi(n.materiauxAutorises[0] ?? null)
       })
       .catch((e) => !annule && setErreur(e))
     return () => {
@@ -107,8 +106,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         <PanneauMateriaux
           materiaux={materiaux}
           autorises={niveau.materiauxAutorises}
-          choisi={choisi}
-          onChoisir={setChoisi}
+          onPrendre={(materiauId, e) => !resultat && setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })}
         />
 
         <div className="zone-canvas" ref={setZone}>
@@ -117,14 +115,15 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             echelle={echelle}
             materiaux={parId}
             liens={liens}
-            materiauChoisi={choisi}
+            piece={piece}
             resultat={resultat}
             termine={animationFinie}
             surlignes={surlignes}
-            onLien={(a, b) => {
+            onLien={(a, b, materiauId) => {
               setAvertissement(null)
-              if (choisi) setLiens((l) => ajouterLien(l, a, b, choisi, niveau, parId[choisi]))
+              setLiens((l) => ajouterLien(l, a, b, materiauId, niveau, parId[materiauId]))
             }}
+            onPieceFinie={() => setPiece(null)}
             onRefus={setAvertissement}
             onSupprimer={(a, b) => {
               setAvertissement(null)
