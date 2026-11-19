@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chargerNiveau, simulerNiveau } from './api.js'
-import { EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
+import { conseilBudget, conseilsEchec, EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
 import { calculerEchelle, PIXELS_PAR_METRE } from './geometrie.js'
@@ -163,6 +163,9 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             </p>
           )}
           <MessageErreur erreur={erreurSimulation} />
+          {erreurSimulation?.codeErreur === 'BUD-001' && conseilBudget(cout, niveau.budgetMax) && (
+            <p className="aide">{conseilBudget(cout, niveau.budgetMax)}</p>
+          )}
 
           {resultat && animationFinie && (
             <div className={`bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
@@ -171,6 +174,8 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
               {!resultat.estValide && phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId) && (
                 <p>{phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId)}</p>
               )}
+              {!resultat.estValide &&
+                conseilsEchec({ niveau, liens, details: resultat.detailsLiens }).map((c) => <p key={c}>{c}</p>)}
               {phraseMargeDeSecurite(resultat.detailsLiens) && <p>{phraseMargeDeSecurite(resultat.detailsLiens)}</p>}
               <p title={EXPLICATION_SOLIDITE}>
                 Solidité : <span className="chiffre">{resultat.scoreSoliditeGlobal} / 100</span>

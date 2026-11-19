@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lienLePlusCharge, libelleLien, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
+import { carresSansDiagonale, conseilBudget, conseilsEchec, lienLePlusCharge, libelleLien, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 
 const detail = (a, b, tauxStress, tempsRupture = null) => ({
   noeudDepartId: a,
@@ -63,5 +63,48 @@ describe('marge de sécurité', () => {
 
   it('renvoie null sans lien', () => {
     expect(lienLePlusCharge([])).toBeNull()
+  })
+})
+
+describe('conseils d\'échec', () => {
+  const niveau = {
+    longueurMaxLien: 2.5 * Math.SQRT2,
+    hauteurMinRequise: 2.5,
+    materiauxAutorises: ['BOIS'],
+    noeuds: [
+      { id: 1, posX: 0, posY: 0, estAncrageSol: true },
+      { id: 2, posX: 2.5, posY: 0, estAncrageSol: true },
+      { id: 3, posX: 0, posY: 2.5, estAncrageSol: false },
+      { id: 4, posX: 2.5, posY: 2.5, estAncrageSol: false },
+    ],
+  }
+  const lien = (a, b) => ({ noeudDepartId: a, noeudArriveeId: b, materiauId: 'BOIS' })
+  const carre = [lien(1, 2), lien(3, 4), lien(1, 3), lien(2, 4)]
+
+  it('repère un carré sans diagonale, mais pas avec une diagonale', () => {
+    expect(carresSansDiagonale(niveau, carre)).toEqual([[1, 2, 3, 4]])
+    expect(carresSansDiagonale(niveau, [...carre, lien(1, 4)])).toEqual([])
+  })
+
+  it('conseille une diagonale pour un carré qui s\'effondre', () => {
+    const details = carre.map((l) => detail(l.noeudDepartId, l.noeudArriveeId, 99, 0.1))
+    const [premier] = conseilsEchec({ niveau, liens: carre, details })
+    expect(premier).toMatch(/diagonale dans le carré des nœuds 1, 2, 3, 4/)
+  })
+
+  it('conseille un lien en plus quand un lien casse sans carré ouvert', () => {
+    const liens2 = [lien(1, 3)]
+    const conseils = conseilsEchec({ niveau, liens: liens2, details: [detail(1, 3, 1.2, 0.5)] })
+    expect(conseils[0]).toMatch(/ajoute un lien à côté/)
+    expect(conseils[1]).toMatch(/n'atteint plus/)
+  })
+
+  it('ne dit rien quand rien n\'a cassé', () => {
+    expect(conseilsEchec({ niveau, liens: [lien(1, 3)], details: [detail(1, 3, 0.5)] })).toEqual([])
+  })
+
+  it('signale un budget dépassé', () => {
+    expect(conseilBudget(260, 250)).toMatch(/10/)
+    expect(conseilBudget(250, 250)).toBeNull()
   })
 })
