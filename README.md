@@ -29,3 +29,7 @@ Les erreurs ont le format `{ timestamp, codeErreur, contexte, message }` (voir `
 ## Tests
 
 `cd backend && ./mvnw test` et `cd frontend && npm test`.
+
+## Docker
+
+`docker compose up --build` puis ouvrir `http://localhost:3000` (API sur `http://localhost:8080`).
