@@ -131,4 +131,20 @@ describe('cibleDePiece', () => {
   it('ne cible rien quand la pièce est loin de la structure', () => {
     expect(cibleDePiece(500, 500, grille, 10)).toBeNull()
   })
+
+  it('départage les deux diagonales d\'un carré selon la position du pointeur', () => {
+    const carre = {
+      ...grille,
+      noeuds: [
+        { id: 1, posX: 0, posY: 0 },
+        { id: 2, posX: 2.5, posY: 0 },
+        { id: 3, posX: 0, posY: 2.5 },
+        { id: 4, posX: 2.5, posY: 2.5 },
+      ],
+    }
+    const versBasGauche = metresVersPixels(1, 1, carre, 10, 30) // sur la diagonale 1-4
+    const versBasDroite = metresVersPixels(1.5, 1, carre, 10, 30) // sur la diagonale 2-3
+    expect(cibleDePiece(versBasGauche.x, versBasGauche.y, carre, 10)).toEqual({ departId: 1, arriveeId: 4 })
+    expect(cibleDePiece(versBasDroite.x, versBasDroite.y, carre, 10)).toEqual({ departId: 2, arriveeId: 3 })
+  })
 })

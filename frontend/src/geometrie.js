@@ -69,14 +69,16 @@ export function lienSous(px, py, liens, niveau, echelle = PIXELS_PAR_METRE, seui
 }
 
 /**
- * Paire de nœuds voisins (distance <= longueurMaxLien) sur laquelle aimanter une pièce tenue au point (px, py) :
- * celle dont le milieu est le plus proche, à moins de `rayon` pixels (par défaut une demi-maille de la grille).
+ * Paire de nœuds voisins (distance <= longueurMaxLien) sur laquelle aimanter une pièce tenue au point (px, py).
+ * Candidates : celles dont le milieu est à moins de `rayon` pixels (par défaut une demi-maille de la grille).
+ * On prend celle dont le segment passe le plus près du pointeur : les deux diagonales d'un carré ont le même milieu,
+ * c'est la position du pointeur qui les départage. Le milieu sert seulement à départager les ex æquo.
  */
 export function cibleDePiece(px, py, niveau, echelle = PIXELS_PAR_METRE, rayon = 1.25 * echelle) {
   const maxGrille = niveau.longueurMaxLien ?? Infinity
   const { noeuds } = niveau
   let meilleure = null
-  let distanceMin = rayon
+  let scoreMin = Infinity
   for (let i = 0; i < noeuds.length; i++) {
     for (let j = i + 1; j < noeuds.length; j++) {
       const a = noeuds[i]
@@ -84,10 +86,15 @@ export function cibleDePiece(px, py, niveau, echelle = PIXELS_PAR_METRE, rayon =
       if (Math.hypot(a.posX - b.posX, a.posY - b.posY) > maxGrille + 1e-9) continue
       const pa = metresVersPixels(a.posX, a.posY, niveau, echelle)
       const pb = metresVersPixels(b.posX, b.posY, niveau, echelle)
-      const d = Math.hypot(px - (pa.x + pb.x) / 2, py - (pa.y + pb.y) / 2)
-      if (d <= distanceMin) {
+      const dMilieu = Math.hypot(px - (pa.x + pb.x) / 2, py - (pa.y + pb.y) / 2)
+      if (dMilieu > rayon) continue
+      const dx = pb.x - pa.x
+      const dy = pb.y - pa.y
+      const t = Math.max(0, Math.min(1, ((px - pa.x) * dx + (py - pa.y) * dy) / (dx * dx + dy * dy)))
+      const score = Math.hypot(px - (pa.x + t * dx), py - (pa.y + t * dy)) + 0.05 * dMilieu
+      if (score < scoreMin) {
         meilleure = { departId: a.id, arriveeId: b.id }
-        distanceMin = d
+        scoreMin = score
       }
     }
   }
