@@ -1,0 +1,28 @@
+Voici une proposition de prompt détaillé pour générer les images de vos objets en bois.
+
+Ce prompt est conçu pour respecter la charte graphique que vous avez définie précédemment : simple, fluide, colorée et stylisée (type cartoon/rétro compatible avec l'esthétique Pokémon), et pour fournir plusieurs formes (poutres simples, treillis complexes, tas de bois) tout en gardant une cohérence visuelle.
+
+Le Prompt d'Image (en Anglais pour les générateurs d'image)
+A collection of stylized, colorful game asset icons representing different wooden construction elements for a retro browser game. The style must be clean, fluid, and simplified cartoon illustration, with friendly textures and rich warm brown colors, consistent with a retro aesthetic like older Pokémon games. The objects are isolated on a plain neutral background. The set includes: (1) Single sturdy wooden construction beams of various lengths. (2) Complex structural wooden truss elements forming rigid triangle shapes. (3) A small stack of cut lumber logs. (4) Interlocking wooden joints. Soft even lighting, clear thick outlines, and vibrant colorful highlights, emphasizing simplicity and usability.
+
+Explication des choix du prompt :
+- Stylized, colorful game asset icons : Définit l'usage (icônes d'inventaire) et l'esthétique générale (pas réaliste).
+- 
+- Clean, fluid, and simplified cartoon illustration : Reprend exactement vos termes de charte graphique ("simple", "fluide").
+- 
+- Friendly textures and rich warm brown colors : Assure que le bois est attrayant et coloré, pas terne.
+- 
+- Consistent with a retro aesthetic like older Pokémon games : Donne la référence directe que vous avez fournie pour la police d'écriture, ce qui aide le générateur à comprendre le degré de simplification attendu.
+- 
+- Isolated on a plain neutral background : Crucial pour pouvoir détourer les objets facilement et les intégrer dans votre interface React (panel de gauche).
+- 
+- [Liste des formes] : C'est ici que l'on demande les variations.
+- 
+  - (1) Single sturdy wooden construction beams : Les poutres de base.
+  - 
+  - (2) Complex structural wooden truss elements forming rigid triangle shapes : Des formes pré-assemblées en triangle (la clé de la solidité, comme discuté).
+  - 
+  - (3) A small stack of cut lumber logs : Un icône générique pour représenter la ressource "bois".
+  - 
+- Clear thick outlines : Renforce le côté cartoon/rétro et la lisibilité sur petit écran.
+- 
