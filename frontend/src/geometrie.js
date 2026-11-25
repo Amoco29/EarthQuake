@@ -9,13 +9,19 @@ const ORIGINE_DEFAUT = { x: MARGE, y: MARGE }
 export const RESERVE_HAUT = 70
 export const RESERVE_BAS = 170
 
+/** Hauteur à cadrer : le nœud le plus haut ou la cible si elle est plus haute, plus une marge pour le drapeau. */
+export function hauteurUtile(niveau) {
+  const plusHaut = Math.max(niveau.hauteurMinRequise ?? 0, ...(niveau.noeuds ?? []).map((n) => n.posY))
+  return Math.min(niveau.hauteurZone, plusHaut + 1.2)
+}
+
 /**
  * Échelle et origine pour un canvas plein écran de taille `espace` : la zone est centrée en largeur,
  * son sol (Y = 0) est posé juste au-dessus de la réserve du bas.
  */
 export function calculerVue(niveau, espace) {
   const sol = espace.hauteur - RESERVE_BAS
-  const parHauteur = (sol - RESERVE_HAUT - MARGE) / niveau.hauteurZone
+  const parHauteur = (sol - RESERVE_HAUT - MARGE) / hauteurUtile(niveau)
   const parLargeur = (espace.largeur * 0.6) / niveau.largeurZone
   const echelle = Math.max(1, Math.min(ECHELLE_MAX, parHauteur, parLargeur))
   return { echelle, origine: { x: (espace.largeur - niveau.largeurZone * echelle) / 2, y: sol - niveau.hauteurZone * echelle } }

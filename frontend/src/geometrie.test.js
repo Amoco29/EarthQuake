@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculerVue, cibleDePiece, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres, positionDecor, RATIO_DECOR, RESERVE_BAS, RESERVE_HAUT, SOL_DECOR } from './geometrie.js'
+import { calculerVue, hauteurUtile, cibleDePiece, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres, positionDecor, RATIO_DECOR, RESERVE_BAS, RESERVE_HAUT, SOL_DECOR } from './geometrie.js'
 
 const niveau = { largeurZone: 5, hauteurZone: 10 }
 
@@ -48,7 +48,7 @@ describe('noeudSous et lienSous', () => {
 })
 
 describe('calculerVue', () => {
-  const niveau = { largeurZone: 5, hauteurZone: 10 }
+  const niveau = { largeurZone: 5, hauteurZone: 10, hauteurMinRequise: 5, noeuds: [{ posY: 7.5 }] }
 
   it('ne dépasse jamais l\'échelle maximale et centre la zone', () => {
     const { echelle, origine } = calculerVue(niveau, { largeur: 5000, hauteur: 5000 })
@@ -59,7 +59,7 @@ describe('calculerVue', () => {
   it('pose le sol au-dessus de la réserve du bas et le haut sous le HUD', () => {
     const { echelle, origine } = calculerVue(niveau, { largeur: 5000, hauteur: 700 })
     expect(origine.y + 10 * echelle).toBe(700 - RESERVE_BAS)
-    expect(origine.y).toBeGreaterThanOrEqual(RESERVE_HAUT)
+    expect(origine.y + (10 - hauteurUtile(niveau)) * echelle).toBeGreaterThanOrEqual(RESERVE_HAUT) // haut de la hauteur utile
   })
 
   it('ne tombe jamais sous 1 px par mètre', () => {
@@ -141,5 +141,17 @@ describe('positionDecor', () => {
     const { hauteur, haut } = positionDecor(1376, 500)
     expect(hauteur).toBeCloseTo(1376 * RATIO_DECOR)
     expect(haut + SOL_DECOR * hauteur).toBeCloseTo(500)
+  })
+})
+
+describe('hauteurUtile', () => {
+  it('cadre le nœud le plus haut avec une marge, sans dépasser la zone', () => {
+    const niveau = { hauteurZone: 10, hauteurMinRequise: 5, noeuds: [{ posY: 0 }, { posY: 7.5 }] }
+    expect(hauteurUtile(niveau)).toBeCloseTo(8.7)
+    expect(hauteurUtile({ ...niveau, hauteurZone: 8 })).toBe(8)
+  })
+
+  it('prend la cible quand elle dépasse les nœuds', () => {
+    expect(hauteurUtile({ hauteurZone: 10, hauteurMinRequise: 6, noeuds: [{ posY: 2.5 }] })).toBeCloseTo(7.2)
   })
 })
