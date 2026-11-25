@@ -3,7 +3,7 @@ import { chargerNiveau, simulerNiveau } from './api.js'
 import { conseilBudget, conseilsEchec, EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
-import { calculerEchelle, dimensionsCanvas, MARGE, PIXELS_PAR_METRE } from './geometrie.js'
+import { calculerVue } from './geometrie.js'
 import Decor from './Decor.jsx'
 import NiveauCanvas from './NiveauCanvas.jsx'
 import PanneauMateriaux from './PanneauMateriaux.jsx'
@@ -45,7 +45,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const cout = niveau ? coutTotal(liens, niveau, parId) : 0
   const hauteur = niveau ? hauteurAtteinte(liens, niveau) : 0
 
-  const echelle = niveau && espace.hauteur > 0 ? calculerEchelle(niveau, espace) : PIXELS_PAR_METRE
+  const vue = useMemo(() => (niveau && espace.hauteur > 0 ? calculerVue(niveau, espace) : null), [niveau, espace])
 
   // À l'échec, après la secousse : le (ou les) premier lien cassé clignote sur le canvas.
   const surlignes = useMemo(
@@ -127,39 +127,15 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const etapeTuto = estTutoriel(niveau) && !estTermine(tuto) ? etapesTuto[tuto.index] : null
 
   return (
-    <main className="jeu" data-tuto-actif={etapeTuto?.cible}>
-      <header className="entete">
-        <button onClick={onRetour}>← Carte</button>
-        <h1>
-          Niveau {niveau.numero} : {niveau.nom}
-        </h1>
-        {estTutoriel(niveau) && !etapeTuto && <button onClick={revoirTuto}>Revoir le tutoriel</button>}
-        <div className="indicateurs">
-          <span data-tuto="budget" className={budgetDepasse ? 'mauvais' : ''}>
-            Budget : {cout.toFixed(0)} / {niveau.budgetMax}
-          </span>
-          <span className={hauteurOk ? 'bon' : ''}>
-            Hauteur : {hauteur.toFixed(1)} / {niveau.hauteurMinRequise} m
-          </span>
-        </div>
-      </header>
-
-      <div className="plateau">
-        <PanneauMateriaux
-          materiaux={materiaux}
-          autorises={niveau.materiauxAutorises}
-          onPrendre={(materiauId, e) => {
-            if (resultat) return
-            setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })
-            evenement('materiauChoisi')
-          }}
-        />
-
-        <div className="zone-canvas" data-tuto="zone-construction" ref={setZone}>
-          <Decor espace={espace} sol={(espace.hauteur + dimensionsCanvas(niveau, echelle).hauteur) / 2 - MARGE} secousse={Boolean(resultat) && !animationFinie} />
+    <main className="jeu" data-tuto-actif={etapeTuto?.cible} ref={setZone}>
+      {vue && (
+        <>
+          <Decor espace={espace} sol={vue.origine.y + niveau.hauteurZone * vue.echelle} secousse={Boolean(resultat) && !animationFinie} />
           <NiveauCanvas
             niveau={niveau}
-            echelle={echelle}
+            echelle={vue.echelle}
+            origine={vue.origine}
+            espace={espace}
             materiaux={parId}
             liens={liens}
             piece={piece}
@@ -179,9 +155,38 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             }}
             onFin={finAnimation}
           />
-        </div>
+        </>
+      )}
 
-        <section className="colonne-resultat">
+      <header className="boite hud-titre">
+        <button onClick={onRetour}>← Carte</button>
+        <h1>
+          Niveau {niveau.numero} : {niveau.nom}
+        </h1>
+        {estTutoriel(niveau) && !etapeTuto && <button onClick={revoirTuto}>Revoir le tutoriel</button>}
+      </header>
+
+      <div className="boite hud-indicateurs indicateurs">
+        <span data-tuto="budget" className={budgetDepasse ? 'mauvais' : ''}>
+          Budget : {cout.toFixed(0)} / {niveau.budgetMax}
+        </span>
+        <span className={hauteurOk ? 'bon' : ''}>
+          Hauteur : {hauteur.toFixed(1)} / {niveau.hauteurMinRequise} m
+        </span>
+      </div>
+
+      <div className="hud-bas">
+        <PanneauMateriaux
+          materiaux={materiaux}
+          autorises={niveau.materiauxAutorises}
+          onPrendre={(materiauId, e) => {
+            if (resultat) return
+            setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })
+            evenement('materiauChoisi')
+          }}
+        />
+
+        <div className="hud-messages">
           {etapeTuto && (
             <Tutoriel
               etape={etapeTuto}
@@ -191,32 +196,21 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
               onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
             />
           )}
-          {!resultat && (
-            <div className="actions">
-              <button data-tuto="bouton-seisme" onClick={simuler} disabled={enCours || liens.length === 0}>
-                Lancer le séisme
-              </button>
-              <button onClick={annuler} disabled={passe.length === 0} title="Ctrl+Z">
-                Annuler
-              </button>
-              <button onClick={() => modifierLiens(() => [])} disabled={liens.length === 0}>
-                Tout effacer
-              </button>
-            </div>
-          )}
-
           {avertissement && (
-            <p role="status" className="erreur">
+            <p role="status" className="boite erreur">
               {avertissement}
             </p>
           )}
-          <MessageErreur erreur={erreurSimulation} />
-          {erreurSimulation?.codeErreur === 'BUD-001' && conseilBudget(cout, niveau.budgetMax) && (
-            <p className="aide">{conseilBudget(cout, niveau.budgetMax)}</p>
+          {erreurSimulation && (
+            <div className="boite">
+              <MessageErreur erreur={erreurSimulation} />
+              {erreurSimulation.codeErreur === 'BUD-001' && conseilBudget(cout, niveau.budgetMax) && (
+                <p className="aide">{conseilBudget(cout, niveau.budgetMax)}</p>
+              )}
+            </div>
           )}
-
           {resultat && animationFinie && (
-            <div className={`bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
+            <div className={`boite bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
               <h2>{resultat.estValide ? 'Niveau réussi !' : 'Niveau raté'}</h2>
               <p>{resultat.messageBilan}</p>
               {!resultat.estValide && phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId) && (
@@ -238,7 +232,21 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
               {resultat.estValide && !suivantId && <p>Tu as terminé tous les niveaux !</p>}
             </div>
           )}
-        </section>
+        </div>
+
+        {!resultat && (
+          <div className="boite actions hud-actions">
+            <button data-tuto="bouton-seisme" onClick={simuler} disabled={enCours || liens.length === 0}>
+              Lancer le séisme
+            </button>
+            <button onClick={annuler} disabled={passe.length === 0} title="Ctrl+Z">
+              Annuler
+            </button>
+            <button onClick={() => modifierLiens(() => [])} disabled={liens.length === 0}>
+              Tout effacer
+            </button>
+          </div>
+        )}
       </div>
     </main>
   )

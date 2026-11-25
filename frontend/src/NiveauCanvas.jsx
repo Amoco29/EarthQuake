@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { animationTerminee, DUREE_ANIMATION } from './animation.js'
 import { dessinerScene, POLICE } from './dessin.js'
 import { lienAutorise } from './construction.js'
-import { cibleDePiece, dimensionsCanvas, lienSous } from './geometrie.js'
+import { cibleDePiece, lienSous } from './geometrie.js'
 
 /**
  * Canvas du niveau. En construction : `piece` ({ materiauId, clientX, clientY }) est la pièce que le joueur tient,
@@ -10,25 +10,27 @@ import { cibleDePiece, dimensionsCanvas, lienSous } from './geometrie.js'
  * puis `onPieceFinie` la rend. Cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
  * ensuite (`termine`), les liens `surlignes` clignotent. Un lien trop long est tracé en rouge et refusé (`onRefus`).
  */
-export default function NiveauCanvas({ niveau, echelle, materiaux, liens, piece, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, origine, espace, materiaux, liens, piece, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
   const ref = useRef(null)
   const [curseur, setCurseur] = useState(null) // position de la pièce tenue, en pixels du canvas
   // Débuts des animations, gardés hors de l'effet : un redimensionnement ne doit pas les relancer.
   const debuts = useRef({ secousse: null, clignote: null })
-  const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
+  const { largeur, hauteur } = espace
+  const ratio = window.devicePixelRatio || 1
 
   const drag = useMemo(() => {
     if (!piece || !curseur) return null
-    const paire = cibleDePiece(curseur.x, curseur.y, niveau, echelle)
+    const paire = cibleDePiece(curseur.x, curseur.y, niveau, echelle, undefined, origine)
     const cible = paire && { ...paire, ...lienAutorise(paire.departId, paire.arriveeId, niveau, materiaux[piece.materiauId]) }
     return { materiauId: piece.materiauId, ...curseur, cible }
-  }, [piece, curseur, niveau, echelle, materiaux])
+  }, [piece, curseur, niveau, echelle, origine, materiaux])
 
   useEffect(() => {
     let annule = false
     let image = 0
     const ctx = ref.current.getContext('2d')
-    const scene = { niveau, echelle, materiaux, liens, drag, resultat, surlignes }
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0) // on dessine en pixels CSS, quelle que soit la densité de l'écran
+    const scene = { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, surlignes }
 
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
@@ -68,7 +70,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, piece,
       annule = true
       cancelAnimationFrame(image)
     }
-  }, [niveau, echelle, materiaux, liens, drag, resultat, termine, surlignes, onFin])
+  }, [niveau, echelle, origine, espace, ratio, materiaux, liens, drag, resultat, termine, surlignes, onFin])
 
   const versCanvas = (e) => {
     const rect = ref.current.getBoundingClientRect()
@@ -85,7 +87,7 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, piece,
     const deplacer = (e) => setCurseur(versCanvas(e))
     const relacher = (e) => {
       const { x, y } = versCanvas(e)
-      const paire = cibleDePiece(x, y, niveau, echelle)
+      const paire = cibleDePiece(x, y, niveau, echelle, undefined, origine)
       if (paire) {
         const verdict = lienAutorise(paire.departId, paire.arriveeId, niveau, materiaux[piece.materiauId])
         if (verdict.ok) onLien(paire.departId, paire.arriveeId, piece.materiauId)
@@ -107,16 +109,16 @@ export default function NiveauCanvas({ niveau, echelle, materiaux, liens, piece,
   function enfoncer(e) {
     if (resultat || piece) return
     const { x, y } = versCanvas(e)
-    const lien = lienSous(x, y, liens, niveau, echelle)
+    const lien = lienSous(x, y, liens, niveau, echelle, undefined, origine)
     if (lien) onSupprimer(lien.noeudDepartId, lien.noeudArriveeId)
   }
 
   return (
     <canvas
       ref={ref}
-      width={largeur}
-      height={hauteur}
-      style={{ touchAction: 'none', maxWidth: '100%', cursor: 'default' }}
+      width={largeur * ratio}
+      height={hauteur * ratio}
+      style={{ touchAction: 'none', width: largeur, height: hauteur, cursor: 'default' }}
       aria-label={`Niveau ${niveau.nom}`}
       onPointerDown={enfoncer}
     />

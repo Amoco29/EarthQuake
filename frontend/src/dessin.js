@@ -1,13 +1,13 @@
 import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
 import { cleLien, indexerNoeuds, noeudsCompatibles } from './construction.js'
-import { dimensionsCanvas, metresVersPixels } from './geometrie.js'
+import { metresVersPixels } from './geometrie.js'
 
 export const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
 const largeurLien = (echelle) => Math.min(10, Math.max(5, echelle * 0.12))
 const rayonNoeud = (echelle) => Math.min(11, Math.max(6, echelle * 0.13))
 
-function pixels(noeud, niveau, echelle) {
-  return metresVersPixels(noeud.posX, noeud.posY, niveau, echelle)
+function pixels(noeud, niveau, echelle, origine) {
+  return metresVersPixels(noeud.posX, noeud.posY, niveau, echelle, origine)
 }
 
 /** Un lien = un rectangle de la longueur entre les nœuds, pivoté selon l'angle. */
@@ -61,9 +61,8 @@ function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angl
  * `drag` : pièce tenue par le joueur { materiauId, x, y, cible: { departId, arriveeId, ok } | null }
  * `resultat` + `temps` : mode séisme (couleurs de stress, secousse, liens cassés).
  */
-export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, resultat, temps, surlignes = [] }) {
-  const { largeur, hauteur } = dimensionsCanvas(niveau, echelle)
-  ctx.clearRect(0, 0, largeur, hauteur)
+export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, temps, surlignes = [] }) {
+  ctx.clearRect(0, 0, espace.largeur, espace.hauteur)
 
   ctx.save()
   if (resultat) {
@@ -72,16 +71,16 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
   }
 
   // Zone de construction
-  const coin = metresVersPixels(0, niveau.hauteurZone, niveau, echelle)
-  const oppose = metresVersPixels(niveau.largeurZone, 0, niveau, echelle)
+  const coin = metresVersPixels(0, niveau.hauteurZone, niveau, echelle, origine)
+  const oppose = metresVersPixels(niveau.largeurZone, 0, niveau, echelle, origine)
   ctx.fillStyle = 'rgba(255,255,255,0.55)' // voile : le décor reste visible, la structure lisible
   ctx.fillRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)
   ctx.strokeStyle = '#888'
   ctx.strokeRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)
 
   // Ligne de hauteur à atteindre
-  const gauche = metresVersPixels(0, niveau.hauteurMinRequise, niveau, echelle)
-  const droite = metresVersPixels(niveau.largeurZone, niveau.hauteurMinRequise, niveau, echelle)
+  const gauche = metresVersPixels(0, niveau.hauteurMinRequise, niveau, echelle, origine)
+  const droite = metresVersPixels(niveau.largeurZone, niveau.hauteurMinRequise, niveau, echelle, origine)
   ctx.strokeStyle = 'crimson'
   ctx.setLineDash([6, 4])
   ctx.beginPath()
@@ -97,8 +96,8 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
   const noeuds = indexerNoeuds(niveau)
   const details = Object.fromEntries((resultat?.detailsLiens ?? []).map((d) => [cleLien(d.noeudDepartId, d.noeudArriveeId), d]))
   for (const lien of liens) {
-    const a = pixels(noeuds[lien.noeudDepartId], niveau, echelle)
-    const b = pixels(noeuds[lien.noeudArriveeId], niveau, echelle)
+    const a = pixels(noeuds[lien.noeudDepartId], niveau, echelle, origine)
+    const b = pixels(noeuds[lien.noeudArriveeId], niveau, echelle, origine)
     const detail = details[cleLien(lien.noeudDepartId, lien.noeudArriveeId)]
     if (detail) {
       const etat = etatRupture(detail, temps)
@@ -110,7 +109,7 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
 
   // Nœuds : cercle, ou triangle pour un ancrage au sol
   for (const noeud of niveau.noeuds) {
-    const { x, y } = pixels(noeud, niveau, echelle)
+    const { x, y } = pixels(noeud, niveau, echelle, origine)
     ctx.fillStyle = noeud.estAncrageSol ? '#444' : '#1b6ec2'
     ctx.beginPath()
     if (noeud.estAncrageSol) {
@@ -130,15 +129,15 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
     ctx.strokeStyle = 'rgba(26, 156, 58, 0.7)'
     ctx.lineWidth = 2
     for (const id of noeudsCompatibles(niveau, materiaux[drag.materiauId])) {
-      const { x, y } = pixels(noeuds[id], niveau, echelle)
+      const { x, y } = pixels(noeuds[id], niveau, echelle, origine)
       ctx.beginPath()
       ctx.arc(x, y, rayonNoeud(echelle) + 5, 0, Math.PI * 2)
       ctx.stroke()
     }
   }
 
-  if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle)
-  dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, temps)
+  if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine)
+  dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, origine, temps)
   ctx.restore()
 }
 
@@ -146,12 +145,12 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
  * Pièce en cours de glisser : longueur fixe du matériau, avec un nœud virtuel à chaque bout.
  * Sans cible elle suit le pointeur ; avec une cible elle s'aligne sur les deux nœuds (verts si la pose est permise, rouges sinon).
  */
-function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle) {
+function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine) {
   const materiau = materiaux[drag.materiauId]
   const demi = ((materiau?.longueurMax ?? 2.5) * echelle) / 2
   const { cible } = drag
-  const a = cible ? pixels(noeuds[cible.departId], niveau, echelle) : { x: drag.x - demi, y: drag.y }
-  const b = cible ? pixels(noeuds[cible.arriveeId], niveau, echelle) : { x: drag.x + demi, y: drag.y }
+  const a = cible ? pixels(noeuds[cible.departId], niveau, echelle, origine) : { x: drag.x - demi, y: drag.y }
+  const b = cible ? pixels(noeuds[cible.arriveeId], niveau, echelle, origine) : { x: drag.x + demi, y: drag.y }
   ctx.save()
   ctx.globalAlpha = 0.85
   dessinerRectangle(ctx, a, b, 0, 1, materiau?.couleurHex ?? '#000', largeurLien(echelle), estBois(drag.materiauId))
@@ -169,15 +168,15 @@ function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle) {
 }
 
 /** Halo rouge qui clignote (2 fois par seconde) sur les liens fragiles et leurs deux nœuds. */
-function dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, temps) {
+function dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, origine, temps) {
   if (surlignes.length === 0) return
   ctx.save()
   ctx.globalAlpha = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(temps * Math.PI * 4))
   ctx.strokeStyle = '#ff1744'
   ctx.lineCap = 'round'
   for (const s of surlignes) {
-    const a = pixels(noeuds[s.noeudDepartId], niveau, echelle)
-    const b = pixels(noeuds[s.noeudArriveeId], niveau, echelle)
+    const a = pixels(noeuds[s.noeudDepartId], niveau, echelle, origine)
+    const b = pixels(noeuds[s.noeudArriveeId], niveau, echelle, origine)
     ctx.lineWidth = largeurLien(echelle) + 10
     ctx.beginPath()
     ctx.moveTo(a.x, a.y)

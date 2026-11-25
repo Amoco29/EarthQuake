@@ -1,28 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { calculerEchelle, cibleDePiece, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres, positionDecor, RATIO_DECOR, SOL_DECOR } from './geometrie.js'
+import { calculerVue, cibleDePiece, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres, positionDecor, RATIO_DECOR, RESERVE_BAS, RESERVE_HAUT, SOL_DECOR } from './geometrie.js'
 
 const niveau = { largeurZone: 5, hauteurZone: 10 }
 
 describe('metresVersPixels', () => {
   it('place le sol (Y = 0) en bas de la zone', () => {
-    expect(metresVersPixels(0, 0, niveau, 10, 5)).toEqual({ x: 5, y: 105 })
+    expect(metresVersPixels(0, 0, niveau, 10, { x: 5, y: 5 })).toEqual({ x: 5, y: 105 })
   })
 
   it('place le haut de la zone (Y = hauteur) en haut, sous la marge', () => {
-    expect(metresVersPixels(5, 10, niveau, 10, 5)).toEqual({ x: 55, y: 5 })
+    expect(metresVersPixels(5, 10, niveau, 10, { x: 5, y: 5 })).toEqual({ x: 55, y: 5 })
   })
 
   it('inverse bien l\'axe Y : plus haut en mètres = plus petit en pixels', () => {
-    const bas = metresVersPixels(2.5, 2.5, niveau, 10, 5)
-    const haut = metresVersPixels(2.5, 5, niveau, 10, 5)
+    const bas = metresVersPixels(2.5, 2.5, niveau, 10, { x: 5, y: 5 })
+    const haut = metresVersPixels(2.5, 5, niveau, 10, { x: 5, y: 5 })
     expect(haut.y).toBeLessThan(bas.y)
     expect(haut.x).toBe(bas.x)
-  })
-})
-
-describe('dimensionsCanvas', () => {
-  it('englobe la zone et ses deux marges', () => {
-    expect(dimensionsCanvas(niveau, 10, 5)).toEqual({ largeur: 60, hauteur: 110 })
   })
 })
 
@@ -53,30 +47,23 @@ describe('noeudSous et lienSous', () => {
   })
 })
 
-describe('calculerEchelle', () => {
+describe('calculerVue', () => {
   const niveau = { largeurZone: 5, hauteurZone: 10 }
 
-  it('ne dépasse jamais l\'échelle maximale', () => {
-    expect(calculerEchelle(niveau, { largeur: 5000, hauteur: 5000 })).toBe(ECHELLE_MAX)
+  it('ne dépasse jamais l\'échelle maximale et centre la zone', () => {
+    const { echelle, origine } = calculerVue(niveau, { largeur: 5000, hauteur: 5000 })
+    expect(echelle).toBe(ECHELLE_MAX)
+    expect(origine.x).toBe((5000 - 5 * ECHELLE_MAX) / 2)
   })
 
-  it('se règle sur la hauteur disponible quand la fenêtre est basse', () => {
-    // (700 - 2 x 30) / 10 = 64
-    expect(calculerEchelle(niveau, { largeur: 5000, hauteur: 700 })).toBe(64)
+  it('pose le sol au-dessus de la réserve du bas et le haut sous le HUD', () => {
+    const { echelle, origine } = calculerVue(niveau, { largeur: 5000, hauteur: 700 })
+    expect(origine.y + 10 * echelle).toBe(700 - RESERVE_BAS)
+    expect(origine.y).toBeGreaterThanOrEqual(RESERVE_HAUT)
   })
 
-  it('se règle sur la largeur disponible quand la fenêtre est étroite', () => {
-    // (230 - 60) / 5 = 34
-    expect(calculerEchelle(niveau, { largeur: 230, hauteur: 5000 })).toBe(34)
-  })
-
-  it('reste positive même sans espace mesuré', () => {
-    expect(calculerEchelle(niveau, { largeur: 0, hauteur: 0 })).toBe(1)
-  })
-
-  it('donne un canvas qui tient dans la hauteur disponible', () => {
-    const echelle = calculerEchelle(niveau, { largeur: 5000, hauteur: 500 })
-    expect(dimensionsCanvas(niveau, echelle).hauteur).toBeLessThanOrEqual(500)
+  it('ne tombe jamais sous 1 px par mètre', () => {
+    expect(calculerVue(niveau, { largeur: 0, hauteur: 0 }).echelle).toBe(1)
   })
 })
 
@@ -119,12 +106,12 @@ describe('cibleDePiece', () => {
   }
 
   it('aimante sur la paire voisine dont le milieu est le plus proche', () => {
-    const milieu = metresVersPixels(1.25, 0, grille, 10, 30)
+    const milieu = metresVersPixels(1.25, 0, grille, 10, { x: 30, y: 30 })
     expect(cibleDePiece(milieu.x, milieu.y, grille, 10)).toEqual({ departId: 1, arriveeId: 2 })
   })
 
   it('ignore les paires trop éloignées pour la grille', () => {
-    const milieu = metresVersPixels(0, 2.5, grille, 10, 30) // milieu des nœuds 1 et 3, distance 5 m
+    const milieu = metresVersPixels(0, 2.5, grille, 10, { x: 30, y: 30 }) // milieu des nœuds 1 et 3, distance 5 m
     expect(cibleDePiece(milieu.x, milieu.y, grille, 10)).toBeNull()
   })
 
@@ -142,8 +129,8 @@ describe('cibleDePiece', () => {
         { id: 4, posX: 2.5, posY: 2.5 },
       ],
     }
-    const versBasGauche = metresVersPixels(1, 1, carre, 10, 30) // sur la diagonale 1-4
-    const versBasDroite = metresVersPixels(1.5, 1, carre, 10, 30) // sur la diagonale 2-3
+    const versBasGauche = metresVersPixels(1, 1, carre, 10, { x: 30, y: 30 }) // sur la diagonale 1-4
+    const versBasDroite = metresVersPixels(1.5, 1, carre, 10, { x: 30, y: 30 }) // sur la diagonale 2-3
     expect(cibleDePiece(versBasGauche.x, versBasGauche.y, carre, 10)).toEqual({ departId: 1, arriveeId: 4 })
     expect(cibleDePiece(versBasDroite.x, versBasDroite.y, carre, 10)).toEqual({ departId: 2, arriveeId: 3 })
   })
