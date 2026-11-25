@@ -8,7 +8,7 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 
 - Backend : Java 17+, Spring Boot 3.x, H2 en mémoire (dossier `/backend`)
 - Frontend : React + `<canvas>` (dossier `/frontend`)
-- Pas d'images pour le MVP : tout est dessiné avec des formes colorées (voir Rendu)
+- Images : seulement le décor (ciel, immeubles, fumée) dans `frontend/public/images/decor/` ; liens, nœuds et matériaux restent dessinés avec des formes colorées (voir Rendu). Les sons ne sont pas encore intégrés (ressources dans `docs/utilitaire/son/`).
 
 ## Règles du jeu (résumé)
 
@@ -40,13 +40,16 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 - Un test vérifie que chaque `CodeErreur` figure dans `CODES_ERREURS.md`. Skill du projet : `.claude/skills/ajouter-code-erreur`.
 - Tout nouveau code d'erreur doit être ajouté dans `CODES_ERREURS.md` (signification + cause fréquente) dans le même commit. Le modèle de départ est dans `docs/IHM.md`, section 4.
 
-## Rendu frontend (sans images)
+## Rendu frontend
 
-- Lien : rectangle de longueur = distance entre les deux nœuds, pivoté selon l'angle, couleur du matériau (`couleurHex`).
+- Décor : `Decor.jsx` empile trois images (`sol-ciel`, `fumee`, `fond-batiment`) derrière le canvas, qui est transparent avec un voile blanc sur la zone de construction. Le haut de l'herbe est aligné sur le Y = 0 du niveau (`positionDecor`). Le même décor sert à l'écran titre et à la carte (`EcranAvecDecor`). Fumée et tremblement du décor en CSS, coupés par `prefers-reduced-motion`. Image absente : dégradé de couleur de repli.
+- Écran titre affiché une fois par chargement (état en mémoire, pas de `localStorage`).
+- Lien : rectangle de longueur = distance entre les deux nœuds, pivoté selon l'angle, couleur du matériau (`couleurHex`). Le bois a une texture très légère dessinée dans le canvas (reflet, veines, liseré), sans image.
 - Nœud : cercle. Ancrage au sol : triangle.
 - Pendant le séisme : couleur du lien interpolée de vert à rouge selon `tauxStress`, et l'écran tremble. Un lien cassé est dessiné coupé.
 - Police de l'UI : police de style Pokémon, fournie par Ilann dans `frontend/public/fonts/pokemon/` (`Pokemon Solid.ttf` est celle utilisée ; ne pas la télécharger ni la remplacer). Chargée avec `@font-face`, avec « Press Start 2P » puis `monospace` en repli. Réservée aux titres, chiffres et boutons : les phrases (aide, bilan, erreurs) sont en police système lisible, 14 px minimum. Dans le canvas, appeler `document.fonts.load()` avant de dessiner du texte.
 - Mise en page : le jeu tient dans la fenêtre sans défilement ; l'échelle du canvas (jusqu'à 80 px/m) est calculée selon l'espace disponible.
+- Aide au glisser : anneau vert sur les nœuds où la pièce tenue peut se poser (`noeudsCompatibles`). Annulation par bouton et Ctrl+Z.
 - Rupture : le lien cassé tombe puis disparaît en fondu. À l'échec, le premier lien cassé clignote.
 - Les coordonnées métriques du backend sont converties en pixels côté front uniquement.
 
