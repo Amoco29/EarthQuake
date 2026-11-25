@@ -1,7 +1,7 @@
 // Étapes du tutoriel (niveau 0). `cible` = valeur de l'attribut data-tuto de l'élément à mettre en valeur.
 // `condition.nombre` = nombre d'occurrences de l'événement à cumuler avant de passer à l'étape suivante.
 export const etapesTuto = [
-  { id: 'materiau', cible: 'panneau-materiaux', texte: 'Prends une pièce de bois dans le panneau.', condition: { evenement: 'materiauChoisi', nombre: 1 } },
+  { id: 'materiau', cible: 'panneau-materiaux', texte: 'Prends une pièce de bois sur l\'étagère.', condition: { evenement: 'materiauChoisi', nombre: 1 } },
   { id: 'lien-vertical', cible: 'zone-construction', texte: 'Glisse-la entre les deux nœuds de gauche : un lien vertical suffit pour atteindre les 2,5 m demandés.', condition: { evenement: 'lienPose', nombre: 1 } },
   { id: 'diagonales', cible: 'zone-construction', texte: 'Un carré sans diagonale se déforme. Ferme les deux carrés avec une diagonale chacun.', condition: { evenement: 'lienPose', nombre: 4 } },
   { id: 'budget', cible: 'budget', texte: 'Surveille ton budget : chaque lien coûte de l\'argent.', condition: { evenement: 'suivant', nombre: 1 } },

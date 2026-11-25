@@ -1,10 +1,12 @@
-import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
+import { couleurStress, DUREE_ANIMATION, ECHELLE_TEMPS, etatRupture, secousse, tauxAffiche } from './animation.js'
 import { cleLien, indexerNoeuds, noeudsCompatibles } from './construction.js'
 import { texturer } from './dessinMateriaux.js'
-import { dessinerDalle, dessinerEchafaudage, dessinerNoeud } from './dessinZone.js'
+import { dessinerFelix, positionFelix } from './dessinFelix.js'
+import { dessinerPoussiere } from './dessinPoussiere.js'
+import { dessinerDalle, dessinerEchafaudage, dessinerNoeud, dessinerRegle } from './dessinZone.js'
 import { metresVersPixels } from './geometrie.js'
 
-export const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
+export const POLICE = '16px system-ui, sans-serif'
 const largeurLien = (echelle) => Math.min(10, Math.max(5, echelle * 0.12))
 const rayonNoeud = (echelle) => Math.min(11, Math.max(6, echelle * 0.13))
 
@@ -13,7 +15,7 @@ function pixels(noeud, niveau, echelle, origine) {
 }
 
 /** Un lien = un rectangle de la longueur entre les nœuds, pivoté selon l'angle. */
-function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, materiauId) {
+function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, materiauId, teinte) {
   const dx = b.x - a.x
   const dy = b.y - a.y
   ctx.save()
@@ -23,19 +25,35 @@ function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, materiauId) {
   const longueur = Math.hypot(dx, dy) * (vers - de)
   ctx.fillRect(0, -largeur / 2, longueur, largeur)
   texturer(ctx, materiauId, longueur, largeur)
+  if (teinte) {
+    ctx.globalAlpha *= 0.5 // la texture reste visible sous la teinte de stress
+    ctx.fillStyle = teinte
+    ctx.fillRect(0, -largeur / 2, longueur, largeur)
+  }
   ctx.restore()
 }
 
-/** Un lien cassé tombe en tournant autour de son centre (dy en mètres, angle en radians) et s'efface (alpha). */
-function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angle: 0, alpha: 1 }, materiauId) {
+/**
+ * Un lien intact est un rectangle. À sa rupture il se casse en deux : chaque moitié pivote autour de son nœud
+ * et tombe (dy en mètres, angle en radians), puis s'efface (alpha).
+ */
+function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angle: 0, alpha: 1 }, materiauId, teinte) {
   if (etat.alpha <= 0) return
-  const centre = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
   ctx.save()
   ctx.globalAlpha = etat.alpha
-  ctx.translate(centre.x, centre.y + etat.dy * echelle)
-  ctx.rotate(etat.angle)
-  ctx.translate(-centre.x, -centre.y)
-  dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur, materiauId)
+  if (!etat.casse) {
+    dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur, materiauId, teinte)
+  } else {
+    const sens = b.x >= a.x ? 1 : -1 // fait pencher le bout libre vers le bas, quel que soit le sens du lien
+    for (const [pivot, de, vers, signe] of [[a, 0, 0.47, sens], [b, 0.53, 1, -sens]]) {
+      ctx.save()
+      ctx.translate(pivot.x, pivot.y + etat.dy * echelle * 0.7)
+      ctx.rotate(signe * etat.angle * 3)
+      ctx.translate(-pivot.x, -pivot.y)
+      dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, materiauId, teinte)
+      ctx.restore()
+    }
+  }
   ctx.restore()
 }
 
@@ -44,7 +62,7 @@ function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angl
  * `drag` : pièce tenue par le joueur { materiauId, x, y, cible: { departId, arriveeId, ok } | null }
  * `resultat` + `temps` : mode séisme (couleurs de stress, secousse, liens cassés).
  */
-export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, temps, surlignes = [] }) {
+export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, temps, surlignes = [], etatFelix = 'inquiet' }) {
   ctx.clearRect(0, 0, espace.largeur, espace.hauteur)
 
   ctx.save()
@@ -55,20 +73,7 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
 
   dessinerDalle(ctx, niveau, echelle, origine)
   dessinerEchafaudage(ctx, niveau, echelle, origine)
-
-  // Ligne de hauteur à atteindre
-  const gauche = metresVersPixels(0, niveau.hauteurMinRequise, niveau, echelle, origine)
-  const droite = metresVersPixels(niveau.largeurZone, niveau.hauteurMinRequise, niveau, echelle, origine)
-  ctx.strokeStyle = 'crimson'
-  ctx.setLineDash([6, 4])
-  ctx.beginPath()
-  ctx.moveTo(gauche.x, gauche.y)
-  ctx.lineTo(droite.x, droite.y)
-  ctx.stroke()
-  ctx.setLineDash([])
-  ctx.fillStyle = 'crimson'
-  ctx.font = POLICE
-  ctx.fillText(`${niveau.hauteurMinRequise} m`, gauche.x + 4, gauche.y - 4)
+  dessinerRegle(ctx, niveau, echelle, origine)
 
   // Liens
   const noeuds = indexerNoeuds(niveau)
@@ -79,7 +84,7 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
     const detail = details[cleLien(lien.noeudDepartId, lien.noeudArriveeId)]
     if (detail) {
       const etat = etatRupture(detail, temps)
-      dessinerLien(ctx, a, b, couleurStress(etat.casse ? 1 : tauxAffiche(detail, temps)), largeurLien(echelle), echelle, etat, lien.materiauId)
+      dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', largeurLien(echelle), echelle, etat, lien.materiauId, couleurStress(etat.casse ? 1 : tauxAffiche(detail, temps)))
     } else {
       dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', largeurLien(echelle), echelle, undefined, lien.materiauId)
     }
@@ -103,6 +108,18 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
     }
   }
 
+  if (resultat) {
+    const sol = metresVersPixels(niveau.largeurZone / 2, 0, niveau, echelle, origine)
+    const ruptures = resultat.detailsLiens
+      .filter((d) => d.tempsRupture != null)
+      .map((d) => {
+        const p = pixels(noeuds[d.noeudDepartId], niveau, echelle, origine)
+        const q = pixels(noeuds[d.noeudArriveeId], niveau, echelle, origine)
+        return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2, temps: d.tempsRupture * ECHELLE_TEMPS }
+      })
+    dessinerPoussiere(ctx, { temps, duree: DUREE_ANIMATION, echelle, sol: { ...sol, largeur: (niveau.largeurZone + 1.2) * echelle }, ruptures })
+  }
+  dessinerFelix(ctx, positionFelix(niveau, echelle, origine, espace), etatFelix, resultat ? temps : 0)
   if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine)
   dessinerPointRupture(ctx, surlignes, noeuds, niveau, echelle, origine, temps)
   ctx.restore()

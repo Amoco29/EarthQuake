@@ -1,6 +1,6 @@
 // Éléments fixes de la scène : dalle de fondation, échafaudage, nœuds (boulons et plaques).
 import { texturer } from './dessinMateriaux.js'
-import { metresVersPixels } from './geometrie.js'
+import { hauteurUtile, metresVersPixels } from './geometrie.js'
 
 const PAS = 2.5 // m, pas de la grille de nœuds
 const DEBORD = 0.35 // m : l'échafaudage entoure la zone sans toucher les liens
@@ -35,6 +35,7 @@ export function dessinerDalle(ctx, niveau, echelle, origine) {
 export function dessinerEchafaudage(ctx, niveau, echelle, origine) {
   const x0 = -DEBORD
   const x1 = niveau.largeurZone + DEBORD
+  const haut = hauteurUtile(niveau)
   const trait = (xa, ya, xb, yb) => {
     const a = metresVersPixels(xa, ya, niveau, echelle, origine)
     const b = metresVersPixels(xb, yb, niveau, echelle, origine)
@@ -46,9 +47,9 @@ export function dessinerEchafaudage(ctx, niveau, echelle, origine) {
   ctx.lineWidth = 2
   ctx.setLineDash([9, 6])
   ctx.beginPath()
-  trait(x0, 0, x0, niveau.hauteurZone)
-  trait(x1, 0, x1, niveau.hauteurZone)
-  for (let y = PAS; y <= niveau.hauteurZone + 1e-9; y += PAS) trait(x0, y, x1, y)
+  trait(x0, 0, x0, haut)
+  trait(x1, 0, x1, haut)
+  for (let y = PAS; y <= haut + 1e-9; y += PAS) trait(x0, y, x1, y)
   ctx.stroke()
   ctx.restore()
 }
@@ -96,5 +97,59 @@ export function dessinerNoeud(ctx, x, y, rayon, estAncrage) {
     ctx.stroke()
     boulon(ctx, x, y, rayon * 0.7)
   }
+  ctx.restore()
+}
+
+const X_REGLE = -1.25 // m : à gauche de l'échafaudage, donc jamais sur un nœud
+
+/** Règle graduée le long de la zone (trait chaque 0,5 m, chiffre tous les 2,5 m) et drapeau à la hauteur cible. */
+export function dessinerRegle(ctx, niveau, echelle, origine) {
+  const haut = hauteurUtile(niveau)
+  const pt = (m) => metresVersPixels(X_REGLE, m, niveau, echelle, origine)
+  const bas = pt(0)
+  const sommet = pt(haut)
+  ctx.save()
+  ctx.fillStyle = '#f3e3a1'
+  ctx.strokeStyle = '#4a3a10'
+  ctx.lineWidth = 2
+  ctx.fillRect(bas.x - 9, sommet.y, 18, bas.y - sommet.y)
+  ctx.strokeRect(bas.x - 9, sommet.y, 18, bas.y - sommet.y)
+  ctx.font = '16px system-ui, sans-serif'
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = '#2a2008'
+  for (let m = 0.5; m <= haut + 1e-9; m += 0.5) {
+    const { y } = pt(m)
+    const grand = m % PAS === 0
+    ctx.beginPath()
+    ctx.moveTo(bas.x + 9, y)
+    ctx.lineTo(bas.x + 9 - (grand ? 14 : m % 1 === 0 ? 9 : 5), y)
+    ctx.stroke()
+    if (grand) ctx.fillText(`${m}`, bas.x - 13, y)
+  }
+  // drapeau planté à la hauteur à atteindre
+  const cible = pt(niveau.hauteurMinRequise)
+  const hampe = Math.min(34, echelle * 0.55)
+  ctx.strokeStyle = '#2a2008'
+  ctx.lineWidth = 3
+  ctx.beginPath()
+  ctx.moveTo(bas.x + 9, cible.y)
+  ctx.lineTo(bas.x + 9, cible.y - hampe)
+  ctx.stroke()
+  ctx.fillStyle = '#d50000'
+  ctx.beginPath()
+  ctx.moveTo(bas.x + 9, cible.y - hampe)
+  ctx.lineTo(bas.x + 9 + hampe * 0.9, cible.y - hampe * 0.7)
+  ctx.lineTo(bas.x + 9, cible.y - hampe * 0.4)
+  ctx.closePath()
+  ctx.fill()
+  ctx.stroke()
+  ctx.setLineDash([6, 5]) // repère de la hauteur cible jusqu'à l'échafaudage
+  ctx.strokeStyle = 'rgba(213, 0, 0, 0.6)'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(bas.x + 9, cible.y)
+  ctx.lineTo(metresVersPixels(-0.35, 0, niveau, echelle, origine).x, cible.y)
+  ctx.stroke()
   ctx.restore()
 }

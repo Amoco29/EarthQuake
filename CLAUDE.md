@@ -8,7 +8,7 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 
 - Backend : Java 17+, Spring Boot 3.x, H2 en mémoire (dossier `/backend`)
 - Frontend : React + `<canvas>` (dossier `/frontend`)
-- Images : seulement le décor (ciel, immeubles, fumée) dans `frontend/public/images/decor/` ; liens, nœuds et matériaux restent dessinés avec des formes colorées (voir Rendu). Les sons ne sont pas encore intégrés (ressources dans `docs/utilitaire/son/`).
+- Images : seulement le décor (ciel, immeubles, fumée) dans `frontend/public/images/decor/` ; liens, nœuds et matériaux restent dessinés avec des formes colorées (voir Rendu). Sons : quelques-uns sont intégrés (séisme, choix de pièce, pose, recommencer) ; les autres ressources restent dans `docs/utilitaire/son/`.
 
 ## Règles du jeu (résumé)
 
@@ -44,13 +44,15 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 
 - Décor : `Decor.jsx` empile trois images (`sol-ciel`, `fumee`, `fond-batiment`) derrière le canvas, qui est transparent avec un voile blanc sur la zone de construction. Le haut de l'herbe est aligné sur le Y = 0 du niveau (`positionDecor`). Le même décor sert à l'écran titre et à la carte (`EcranAvecDecor`). Fumée et tremblement du décor en CSS, coupés par `prefers-reduced-motion`. Image absente : dégradé de couleur de repli.
 - Écran titre affiché une fois par chargement (état en mémoire, pas de `localStorage`).
-- Lien : rectangle de longueur = distance entre les deux nœuds, pivoté selon l'angle, couleur du matériau (`couleurHex`). Le bois a une texture très légère dessinée dans le canvas (reflet, veines, liseré), sans image.
+- Lien : rectangle de longueur = distance entre les deux nœuds, pivoté selon l'angle, couleur du matériau (`couleurHex`) avec une texture par matériau dessinée dans le canvas (`dessinMateriaux.js`, partagée avec l'étagère), sans image.
 - Nœud : plaque métallique ronde avec une tête de boulon. Ancrage au sol : platine carrée à quatre boulons, posée sur la dalle de fondation. Zone de construction : dalle de béton sous le sol et échafaudage en pointillés (pas de rectangle).
-- Pendant le séisme : couleur du lien interpolée de vert à rouge selon `tauxStress`, et l'écran tremble. Un lien cassé est dessiné coupé.
-- Police de l'UI : police de style Pokémon, fournie par Ilann dans `frontend/public/fonts/pokemon/` (`Pokemon Solid.ttf` est celle utilisée ; ne pas la télécharger ni la remplacer). Chargée avec `@font-face`, avec « Press Start 2P » puis `monospace` en repli. Réservée aux titres, chiffres et boutons : les phrases (aide, bilan, erreurs) sont en police système lisible, 14 px minimum. Dans le canvas, appeler `document.fonts.load()` avant de dessiner du texte.
+- Pendant le séisme : teinte du lien interpolée de vert à rouge selon `tauxStress` (par-dessus la texture), l'écran et le décor tremblent, de la poussière monte du sol et à chaque rupture, et un grondement est joué (`sons.js`, fichiers dans `frontend/public/sons/`, copiés de `docs/utilitaire/son/`).
+- Félix Fixe Junior (`dessinFelix.js`) se tient à droite de la structure, 3 états : inquiet (construction et séisme), content (victoire), découragé (échec). Les messages d'aide, d'avertissement et d'erreur sont dans une bulle (`BulleFelix.jsx`) au-dessus de lui. Règle graduée à gauche de l'échafaudage, drapeau à la hauteur cible.
+- Cadrage : l'échelle dépend de `hauteurUtile` (nœud le plus haut ou hauteur cible, plus 1,2 m), pas de `hauteurZone`.
+- Police de l'UI : une seule police (système, `--police` dans `index.css`) pour toute l'interface, 16 px minimum, y compris dans le canvas. La police Pokémon de `frontend/public/fonts/pokemon/` (fournie par Ilann) n'est plus utilisée : ne pas la supprimer sans demander.
 - Mise en page : le canvas occupe toute la fenêtre (décor derrière, HUD en boîtes de dialogue `.boite` par-dessus, étagère de matériaux en bas) ; `calculerVue` donne l'échelle (jusqu'à 80 px/m) et l'origine en pixels selon l'espace disponible.
 - Aide au glisser : anneau vert sur les nœuds où la pièce tenue peut se poser (`noeudsCompatibles`). Annulation par bouton et Ctrl+Z.
-- Rupture : le lien cassé tombe puis disparaît en fondu. À l'échec, le point de rupture du premier lien cassé est entouré d'un cercle rouge qui pulse. Résultat : boîte de dialogue de 2 lignes (ce qui s'est passé + un conseil), solidité en 1 à 3 étoiles (seuils 40 et 70) à la victoire, boutons Réessayer / Niveau suivant.
+- Rupture : le lien cassé se coupe en deux, les moitiés tombent puis disparaissent en fondu. À l'échec, le point de rupture du premier lien cassé est entouré d'un cercle rouge qui pulse. Résultat : boîte de dialogue de 2 lignes (ce qui s'est passé + un conseil), solidité en 1 à 3 étoiles (seuils 40 et 70) à la victoire, boutons Réessayer / Niveau suivant.
 - Les coordonnées métriques du backend sont converties en pixels côté front uniquement.
 
 ## Décisions de conception (validées par Ilann)

@@ -10,7 +10,7 @@ import { cibleDePiece, lienSous } from './geometrie.js'
  * puis `onPieceFinie` la rend. Cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
  * ensuite (`termine`), le point de rupture des liens `surlignes` est entouré. Un lien trop long est tracé en rouge et refusé (`onRefus`).
  */
-export default function NiveauCanvas({ niveau, echelle, origine, espace, materiaux, liens, piece, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
+export default function NiveauCanvas({ niveau, echelle, origine, espace, materiaux, liens, piece, resultat, termine, surlignes, etatFelix, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
   const ref = useRef(null)
   const [curseur, setCurseur] = useState(null) // position de la pièce tenue, en pixels du canvas
   // Débuts des animations, gardés hors de l'effet : un redimensionnement ne doit pas les relancer.
@@ -30,7 +30,7 @@ export default function NiveauCanvas({ niveau, echelle, origine, espace, materia
     let image = 0
     const ctx = ref.current.getContext('2d')
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0) // on dessine en pixels CSS, quelle que soit la densité de l'écran
-    const scene = { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, surlignes }
+    const scene = { niveau, echelle, origine, espace, materiaux, liens, drag, resultat, surlignes, etatFelix }
 
     // La police doit être chargée avant de dessiner du texte dans le canvas.
     const police = document.fonts ? document.fonts.load(POLICE) : Promise.resolve()
@@ -70,7 +70,7 @@ export default function NiveauCanvas({ niveau, echelle, origine, espace, materia
       annule = true
       cancelAnimationFrame(image)
     }
-  }, [niveau, echelle, origine, espace, ratio, materiaux, liens, drag, resultat, termine, surlignes, onFin])
+  }, [niveau, echelle, origine, espace, ratio, materiaux, liens, drag, resultat, termine, surlignes, etatFelix, onFin])
 
   const versCanvas = (e) => {
     const rect = ref.current.getBoundingClientRect()

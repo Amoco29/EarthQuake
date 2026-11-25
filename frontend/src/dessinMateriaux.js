@@ -2,7 +2,7 @@
 // Le repère est celui d'un lien : origine au début de la barre, rectangle de (0, -largeur/2) à (longueur, largeur/2).
 
 /** Petit générateur déterministe : les grains du béton ne bougent pas d'une image à l'autre. */
-function aleatoire(graine) {
+export function aleatoire(graine) {
   let etat = graine
   return () => {
     etat = (etat * 1664525 + 1013904223) % 4294967296

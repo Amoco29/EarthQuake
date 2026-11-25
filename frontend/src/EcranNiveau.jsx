@@ -3,11 +3,14 @@ import { chargerNiveau, simulerNiveau } from './api.js'
 import { conseilBudget, EXPLICATION_SOLIDITE, etoiles, lignesResultat, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
+import { positionFelix } from './dessinFelix.js'
 import { calculerVue } from './geometrie.js'
+import { jouer } from './sons.js'
 import Decor from './Decor.jsx'
 import NiveauCanvas from './NiveauCanvas.jsx'
 import PanneauMateriaux from './PanneauMateriaux.jsx'
 import { estTutoriel } from './progression.js'
+import BulleFelix from './BulleFelix.jsx'
 import Tutoriel from './Tutoriel.jsx'
 import { avancer, estTermine, etapesTuto, etatInitial } from './tutoriel.js'
 import { useTaille } from './useTaille.js'
@@ -52,6 +55,15 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
     () => (resultat && animationFinie && !resultat.estValide ? premiersLiensCasses(resultat.detailsLiens) : []),
     [resultat, animationFinie],
   )
+
+  const etatFelix = resultat && animationFinie ? (resultat.estValide ? 'content' : 'decourage') : 'inquiet'
+
+  // Le grondement du séisme dure autant que l'animation.
+  useEffect(() => {
+    if (!resultat || animationFinie) return undefined
+    const son = jouer('seisme.mp3', 0.8)
+    return () => son?.pause()
+  }, [resultat, animationFinie])
 
   const finAnimation = useCallback(() => setAnimationFinie(true), [])
 
@@ -108,6 +120,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   }
 
   function recommencer() {
+    jouer('recommencer.wav')
     setResultat(null)
     setAnimationFinie(false)
   }
@@ -142,9 +155,11 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             resultat={resultat}
             termine={animationFinie}
             surlignes={surlignes}
+            etatFelix={etatFelix}
             onLien={(a, b, materiauId) => {
               setAvertissement(null)
               evenement('lienPose')
+              jouer('pose.wav')
               modifierLiens((l) => ajouterLien(l, a, b, materiauId, niveau, parId[materiauId]))
             }}
             onPieceFinie={() => setPiece(null)}
@@ -156,6 +171,29 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             onFin={finAnimation}
           />
         </>
+      )}
+
+      {vue && !resultat && (
+        <BulleFelix felix={positionFelix(niveau, vue.echelle, vue.origine, espace)} gauche={vue.origine.x + (niveau.largeurZone + 0.5) * vue.echelle} espace={espace}>
+          {erreurSimulation ? (
+            <>
+              <MessageErreur erreur={erreurSimulation} />
+              {erreurSimulation.codeErreur === 'BUD-001' && conseilBudget(cout, niveau.budgetMax) && <p>{conseilBudget(cout, niveau.budgetMax)}</p>}
+            </>
+          ) : avertissement ? (
+            <p role="status">{avertissement}</p>
+          ) : etapeTuto ? (
+            <Tutoriel
+              etape={etapeTuto}
+              numero={tuto.index + 1}
+              total={etapesTuto.length}
+              onSuivant={() => evenement('suivant')}
+              onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
+            />
+          ) : liens.length === 0 ? (
+            <p>Glisse une pièce de l&apos;étagère sur deux nœuds voisins. Clique sur un lien pour l&apos;enlever.</p>
+          ) : null}
+        </BulleFelix>
       )}
 
       <header className="boite hud-titre">
@@ -182,33 +220,12 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           onPrendre={(materiauId, e) => {
             if (resultat) return
             setPiece({ materiauId, clientX: e.clientX, clientY: e.clientY })
+            jouer('choix.wav')
             evenement('materiauChoisi')
           }}
         />
 
         <div className="hud-messages">
-          {etapeTuto && (
-            <Tutoriel
-              etape={etapeTuto}
-              numero={tuto.index + 1}
-              total={etapesTuto.length}
-              onSuivant={() => evenement('suivant')}
-              onPasser={() => setTuto({ index: etapesTuto.length, compte: 0 })}
-            />
-          )}
-          {avertissement && (
-            <p role="status" className="boite erreur">
-              {avertissement}
-            </p>
-          )}
-          {erreurSimulation && (
-            <div className="boite">
-              <MessageErreur erreur={erreurSimulation} />
-              {erreurSimulation.codeErreur === 'BUD-001' && conseilBudget(cout, niveau.budgetMax) && (
-                <p className="aide">{conseilBudget(cout, niveau.budgetMax)}</p>
-              )}
-            </div>
-          )}
           {resultat && animationFinie && (
             <div className={`boite bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
               {resultat.estValide && (

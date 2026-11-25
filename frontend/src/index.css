@@ -1,21 +1,12 @@
-/* La police pokemon.ttf est fournie par Ilann dans public/fonts/pokemon (ne pas la télécharger).
-   Si le fichier est absent, le navigateur passe au repli suivant. */
-@font-face {
-  font-family: 'Pokemon';
-  src: url('/fonts/pokemon/Pokemon%20Solid.ttf') format('truetype');
-  font-display: swap;
-}
-
+/* Une seule police pour toute l'interface (la police Pokémon de public/fonts n'est plus utilisée). */
 :root {
-  /* Police Pokémon : titres, chiffres et boutons. Police lisible : toutes les phrases. */
-  --police-titre: 'Pokemon', 'Press Start 2P', monospace;
-  --police-texte: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-family: var(--police-texte);
+  --police: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--police);
   font-size: 16px;
 }
 
-body { font-family: var(--police-texte); font-size: 1rem; line-height: 1.4; }
-h1, h2, button, .chiffre, .indicateurs { font-family: var(--police-titre); font-weight: normal; }
+body { font-family: var(--police); font-size: 1rem; line-height: 1.4; }
+h1, h2 { font-weight: 700; }
 h1 { font-size: 1.1rem; }
 h2 { font-size: 1rem; }
 
@@ -28,10 +19,10 @@ html, body, #root { height: 100%; }
 body { overflow: hidden; padding: 0; }
 #root { overflow: hidden; }
 
-button { font-family: var(--police-titre); font-size: 0.8rem; padding: 6px 12px; cursor: pointer; }
+button { font-family: inherit; font-weight: 700; font-size: 1rem; padding: 6px 12px; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.55; }
 
-.erreur { color: crimson; font-size: 0.9375rem; }
+.erreur { color: crimson; font-size: 1rem; }
 
 /* Écran de jeu : décor et canvas plein écran, HUD en boîtes de dialogue par-dessus. */
 .jeu { position: relative; height: 100%; overflow: hidden; }
@@ -57,7 +48,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   background: repeating-linear-gradient(90deg, #a8743c 0 38px, #9b6932 38px 40px), #a8743c; box-shadow: 0 6px 0 #5a3a1a, 0 10px 14px rgba(0, 0, 0, 0.4); }
 .materiau { cursor: grab; touch-action: none; user-select: none; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 3px solid #3b2410; background: #fffdf5; border-radius: 6px; padding: 6px 8px; }
 .materiau:hover, .materiau:focus-visible { background: #fff3c4; }
-.materiau small { color: #444; font-family: var(--police-texte); font-size: 1rem; }
+.materiau small { color: #444; font-size: 1rem; }
 .aide { font-size: 1rem; color: #444; margin: 4px 0; }
 
 .bilan { pointer-events: auto; }
@@ -76,14 +67,14 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .carte li + li::before { content: ''; position: absolute; top: 50%; left: -32px; width: 28px; border-top: 4px dotted #888; }
 .etape { display: flex; flex-direction: column; align-items: flex-start; border: 3px solid #333; padding: 12px 20px; min-width: 200px; }
 .etape.reussi { border-color: #1b7f3b; }
-.etape small { margin-top: 4px; font-family: var(--police-texte); font-size: 0.875rem; }
+.etape small { margin-top: 4px; font-size: 1rem; }
 
 /* Tutoriel : bulle fixe en bas et halo sur l'élément visé */
 /* Dans la colonne de droite : ne cache pas les nœuds du bas */
 /* Boîte provisoire (remplacée par les bulles de Félix) */
-.bulle-tuto { pointer-events: auto; background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 10px 14px; }
-.bulle-tuto p { margin: 4px 0; font-size: 0.9375rem; }
-.bulle-tuto .etape-tuto { font-family: var(--police-titre); font-size: 0.8rem; }
+.bulle-tuto { pointer-events: auto; }
+.bulle-tuto p { margin: 4px 0; font-size: 1rem; }
+.bulle-tuto .etape-tuto { font-size: 1rem; }
 [data-tuto-actif='panneau-materiaux'] [data-tuto='panneau-materiaux'],
 [data-tuto-actif='zone-construction'] [data-tuto='zone-construction'],
 [data-tuto-actif='budget'] [data-tuto='budget'],
@@ -92,7 +83,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 @media (prefers-reduced-motion: reduce) { [data-tuto-actif] [data-tuto] { animation: none !important; } }
 
 .proposition-tuto { background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 8px 14px; margin: 12px 0; }
-.proposition-tuto p { margin: 4px 0; font-size: 0.9375rem; }
+.proposition-tuto p { margin: 4px 0; font-size: 1rem; }
 
 /* Décor du niveau : derrière le canvas (transparent), images dans public/images/decor */
 .ecran-titre, .ecran-carte { position: relative; overflow: hidden; }
@@ -118,3 +109,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 /* Carte : contenu lisible sur le décor */
 .contenu-carte { position: relative; max-height: 100%; overflow-y: auto; box-sizing: border-box; background: rgba(255, 255, 255, 0.88); border-radius: 12px; padding: 12px 20px; }
+
+/* Bulle d'aide de Félix : boîte avec une queue qui pointe vers lui */
+.bulle-felix { position: absolute; z-index: 2; }
+.bulle-felix p { margin: 4px 0; }
+.bulle-felix::after { content: ''; position: absolute; left: var(--queue); bottom: -14px; width: 0; height: 0; border: 9px solid transparent; border-top: 12px solid #2b2b2b; transform: translateX(-50%); }
