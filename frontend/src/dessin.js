@@ -1,5 +1,6 @@
 import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
 import { cleLien, indexerNoeuds, noeudsCompatibles } from './construction.js'
+import { texturer } from './dessinMateriaux.js'
 import { metresVersPixels } from './geometrie.js'
 
 export const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
@@ -11,7 +12,7 @@ function pixels(noeud, niveau, echelle, origine) {
 }
 
 /** Un lien = un rectangle de la longueur entre les nœuds, pivoté selon l'angle. */
-function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, bois = false) {
+function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, materiauId) {
   const dx = b.x - a.x
   const dy = b.y - a.y
   ctx.save()
@@ -20,31 +21,12 @@ function dessinerRectangle(ctx, a, b, de, vers, couleur, largeur, bois = false) 
   ctx.fillStyle = couleur
   const longueur = Math.hypot(dx, dy) * (vers - de)
   ctx.fillRect(0, -largeur / 2, longueur, largeur)
-  if (bois) texturerBois(ctx, longueur, largeur)
+  texturer(ctx, materiauId, longueur, largeur)
   ctx.restore()
 }
 
-/** Bois très léger, dans le style des illustrations : liseré brun, reflet sur le dessus, deux veines. Sur la couleur déjà posée. */
-function texturerBois(ctx, longueur, largeur) {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)'
-  ctx.fillRect(0, -largeur / 2, longueur, largeur * 0.25)
-  ctx.strokeStyle = 'rgba(70, 25, 5, 0.18)'
-  ctx.lineWidth = 1
-  for (const [y, debut, fin] of [[-0.12, 0.08, 0.7], [0.22, 0.3, 0.92]]) {
-    ctx.beginPath()
-    ctx.moveTo(longueur * debut, largeur * y)
-    ctx.quadraticCurveTo(longueur * ((debut + fin) / 2), largeur * (y + 0.12), longueur * fin, largeur * y)
-    ctx.stroke()
-  }
-  ctx.strokeStyle = 'rgba(70, 25, 5, 0.55)'
-  ctx.lineWidth = 1.5
-  ctx.strokeRect(0, -largeur / 2, longueur, largeur)
-}
-
-const estBois = (materiauId) => materiauId === 'BOIS'
-
 /** Un lien cassé tombe en tournant autour de son centre (dy en mètres, angle en radians) et s'efface (alpha). */
-function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angle: 0, alpha: 1 }, bois = false) {
+function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angle: 0, alpha: 1 }, materiauId) {
   if (etat.alpha <= 0) return
   const centre = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
   ctx.save()
@@ -52,7 +34,7 @@ function dessinerLien(ctx, a, b, couleur, largeur, echelle, etat = { dy: 0, angl
   ctx.translate(centre.x, centre.y + etat.dy * echelle)
   ctx.rotate(etat.angle)
   ctx.translate(-centre.x, -centre.y)
-  dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur, bois)
+  dessinerRectangle(ctx, a, b, 0, 1, couleur, largeur, materiauId)
   ctx.restore()
 }
 
@@ -101,9 +83,9 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
     const detail = details[cleLien(lien.noeudDepartId, lien.noeudArriveeId)]
     if (detail) {
       const etat = etatRupture(detail, temps)
-      dessinerLien(ctx, a, b, couleurStress(etat.casse ? 1 : tauxAffiche(detail, temps)), largeurLien(echelle), echelle, etat, estBois(lien.materiauId))
+      dessinerLien(ctx, a, b, couleurStress(etat.casse ? 1 : tauxAffiche(detail, temps)), largeurLien(echelle), echelle, etat, lien.materiauId)
     } else {
-      dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', largeurLien(echelle), echelle, undefined, estBois(lien.materiauId))
+      dessinerLien(ctx, a, b, materiaux[lien.materiauId]?.couleurHex ?? '#000', largeurLien(echelle), echelle, undefined, lien.materiauId)
     }
   }
 
@@ -153,7 +135,7 @@ function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine) {
   const b = cible ? pixels(noeuds[cible.arriveeId], niveau, echelle, origine) : { x: drag.x + demi, y: drag.y }
   ctx.save()
   ctx.globalAlpha = 0.85
-  dessinerRectangle(ctx, a, b, 0, 1, materiau?.couleurHex ?? '#000', largeurLien(echelle), estBois(drag.materiauId))
+  dessinerRectangle(ctx, a, b, 0, 1, materiau?.couleurHex ?? '#000', largeurLien(echelle), drag.materiauId)
   ctx.globalAlpha = 1
   ctx.strokeStyle = !cible ? '#333' : cible.ok ? '#1a9c3a' : '#e60000'
   ctx.lineWidth = 3
