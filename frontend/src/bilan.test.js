@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { carresSansDiagonale, conseilBudget, conseilsEchec, lienLePlusCharge, libelleLien, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
+import { carresSansDiagonale, conseilBudget, conseilsEchec, etoiles, lignesResultat, lienLePlusCharge, libelleLien, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 
 const detail = (a, b, tauxStress, tempsRupture = null) => ({
   noeudDepartId: a,
@@ -106,5 +106,43 @@ describe('conseils d\'échec', () => {
   it('signale un budget dépassé', () => {
     expect(conseilBudget(260, 250)).toMatch(/10/)
     expect(conseilBudget(250, 250)).toBeNull()
+  })
+})
+
+describe('etoiles', () => {
+  it('donne 1 à 3 étoiles selon les seuils 40 et 70', () => {
+    expect([0, 39, 40, 69, 70, 100].map(etoiles)).toEqual([1, 1, 2, 2, 3, 3])
+  })
+})
+
+describe('lignesResultat', () => {
+  const niveau = {
+    longueurMaxLien: 2.5 * Math.SQRT2,
+    hauteurMinRequise: 2.5,
+    materiauxAutorises: ['BOIS'],
+    noeuds: [
+      { id: 1, posX: 0, posY: 0, estAncrageSol: true },
+      { id: 3, posX: 0, posY: 2.5, estAncrageSol: false },
+    ],
+  }
+  const lienBois = [{ noeudDepartId: 1, noeudArriveeId: 3, materiauId: 'BOIS' }]
+
+  it('donne deux lignes en cas de victoire', () => {
+    const resultat = { estValide: true, detailsLiens: [detail(1, 4, 0.5)], messageBilan: '' }
+    const lignes = lignesResultat({ resultat, niveau, liens, materiaux, suivantExiste: true })
+    expect(lignes).toHaveLength(2)
+    expect(lignes[1]).toMatch(/suivant/)
+  })
+
+  it('désigne le lien cassé puis donne un conseil en cas d\'échec', () => {
+    const resultat = { estValide: false, detailsLiens: [detail(1, 3, 1.4, 3)], messageBilan: 'raté' }
+    const lignes = lignesResultat({ resultat, niveau, liens: lienBois, materiaux, suivantExiste: true })
+    expect(lignes[0]).toMatch(/1–3/)
+    expect(lignes[1]).toMatch(/lâché/)
+  })
+
+  it('retombe sur le message du serveur sans lien cassé', () => {
+    const resultat = { estValide: false, detailsLiens: [detail(1, 3, 0.5)], messageBilan: 'Trop bas' }
+    expect(lignesResultat({ resultat, niveau, liens: lienBois, materiaux, suivantExiste: false })[0]).toBe('Trop bas')
   })
 })

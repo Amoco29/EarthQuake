@@ -91,3 +91,21 @@ export function conseilBudget(cout, budgetMax) {
   if (cout <= budgetMax) return null
   return `Tu dépasses le budget de ${Math.ceil(cout - budgetMax)} : retire un lien ou choisis un matériau moins cher.`
 }
+
+/** Solidité en étoiles : 3 à partir de 70, 2 à partir de 40, sinon 1. */
+export const etoiles = (score) => (score >= 70 ? 3 : score >= 40 ? 2 : 1)
+
+/** Les deux lignes de la boîte de résultat : ce qui s'est passé, puis un seul conseil. */
+export function lignesResultat({ resultat, niveau, liens, materiaux, suivantExiste }) {
+  const { estValide, detailsLiens, messageBilan } = resultat
+  if (estValide) {
+    return [
+      phraseMargeDeSecurite(detailsLiens) ?? 'Ta structure a résisté au séisme !',
+      suivantExiste ? 'Tu peux passer au niveau suivant.' : 'Tu as terminé tous les niveaux !',
+    ]
+  }
+  return [
+    phraseDuPremierLienCasse(detailsLiens, liens, materiaux) ?? messageBilan,
+    conseilsEchec({ niveau, liens, details: detailsLiens })[0] ?? 'Renforce la structure puis réessaie.',
+  ]
+}

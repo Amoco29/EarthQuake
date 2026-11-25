@@ -48,9 +48,9 @@ Specs complètes : `docs/IHM.md` (à lire avant toute tâche de conception).
 - Nœud : plaque métallique ronde avec une tête de boulon. Ancrage au sol : platine carrée à quatre boulons, posée sur la dalle de fondation. Zone de construction : dalle de béton sous le sol et échafaudage en pointillés (pas de rectangle).
 - Pendant le séisme : couleur du lien interpolée de vert à rouge selon `tauxStress`, et l'écran tremble. Un lien cassé est dessiné coupé.
 - Police de l'UI : police de style Pokémon, fournie par Ilann dans `frontend/public/fonts/pokemon/` (`Pokemon Solid.ttf` est celle utilisée ; ne pas la télécharger ni la remplacer). Chargée avec `@font-face`, avec « Press Start 2P » puis `monospace` en repli. Réservée aux titres, chiffres et boutons : les phrases (aide, bilan, erreurs) sont en police système lisible, 14 px minimum. Dans le canvas, appeler `document.fonts.load()` avant de dessiner du texte.
-- Mise en page : le jeu tient dans la fenêtre sans défilement ; l'échelle du canvas (jusqu'à 80 px/m) est calculée selon l'espace disponible.
+- Mise en page : le canvas occupe toute la fenêtre (décor derrière, HUD en boîtes de dialogue `.boite` par-dessus, étagère de matériaux en bas) ; `calculerVue` donne l'échelle (jusqu'à 80 px/m) et l'origine en pixels selon l'espace disponible.
 - Aide au glisser : anneau vert sur les nœuds où la pièce tenue peut se poser (`noeudsCompatibles`). Annulation par bouton et Ctrl+Z.
-- Rupture : le lien cassé tombe puis disparaît en fondu. À l'échec, le premier lien cassé clignote.
+- Rupture : le lien cassé tombe puis disparaît en fondu. À l'échec, le point de rupture du premier lien cassé est entouré d'un cercle rouge qui pulse. Résultat : boîte de dialogue de 2 lignes (ce qui s'est passé + un conseil), solidité en 1 à 3 étoiles (seuils 40 et 70) à la victoire, boutons Réessayer / Niveau suivant.
 - Les coordonnées métriques du backend sont converties en pixels côté front uniquement.
 
 ## Décisions de conception (validées par Ilann)

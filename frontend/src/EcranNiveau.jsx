@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { chargerNiveau, simulerNiveau } from './api.js'
-import { conseilBudget, conseilsEchec, EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
+import { conseilBudget, EXPLICATION_SOLIDITE, etoiles, lignesResultat, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
 import { calculerVue } from './geometrie.js'
@@ -211,25 +211,22 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
           )}
           {resultat && animationFinie && (
             <div className={`boite bilan ${resultat.estValide ? 'gagne' : 'perdu'}`}>
-              <h2>{resultat.estValide ? 'Niveau réussi !' : 'Niveau raté'}</h2>
-              <p>{resultat.messageBilan}</p>
-              {!resultat.estValide && phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId) && (
-                <p>{phraseDuPremierLienCasse(resultat.detailsLiens, liens, parId)}</p>
+              {resultat.estValide && (
+                <p className="etoiles" title={EXPLICATION_SOLIDITE} aria-label={`Solidité : ${etoiles(resultat.scoreSoliditeGlobal)} étoiles sur 3`}>
+                  {[1, 2, 3].map((n) => (
+                    <span key={n} className={n <= etoiles(resultat.scoreSoliditeGlobal) ? 'pleine' : 'vide'}>
+                      ★
+                    </span>
+                  ))}
+                </p>
               )}
-              {!resultat.estValide &&
-                conseilsEchec({ niveau, liens, details: resultat.detailsLiens }).map((c) => <p key={c}>{c}</p>)}
-              {phraseMargeDeSecurite(resultat.detailsLiens) && <p>{phraseMargeDeSecurite(resultat.detailsLiens)}</p>}
-              <p title={EXPLICATION_SOLIDITE}>
-                Solidité : <span className="chiffre">{resultat.scoreSoliditeGlobal} / 100</span>
-              </p>
-              <p className="explication">{EXPLICATION_SOLIDITE}</p>
+              {lignesResultat({ resultat, niveau, liens, materiaux: parId, suivantExiste: Boolean(suivantId) }).map((ligne) => (
+                <p key={ligne}>{ligne}</p>
+              ))}
               <div className="actions">
-                <button onClick={recommencer}>Modifier ma structure</button>
-                {resultat.estValide && suivantId && (
-                  <button onClick={() => onChoisirNiveau(suivantId)}>Niveau suivant →</button>
-                )}
+                <button onClick={recommencer}>Réessayer</button>
+                {resultat.estValide && suivantId && <button onClick={() => onChoisirNiveau(suivantId)}>Niveau suivant →</button>}
               </div>
-              {resultat.estValide && !suivantId && <p>Tu as terminé tous les niveaux !</p>}
             </div>
           )}
         </div>

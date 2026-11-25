@@ -8,7 +8,7 @@ import { cibleDePiece, lienSous } from './geometrie.js'
  * Canvas du niveau. En construction : `piece` ({ materiauId, clientX, clientY }) est la pièce que le joueur tient,
  * prise dans le panneau ; elle s'aimante sur deux nœuds voisins et se pose au relâchement (`onLien`, ou `onRefus`),
  * puis `onPieceFinie` la rend. Cliquer sur un lien le supprime. Quand `resultat` est fourni, joue l'animation du séisme puis appelle `onFin` ;
- * ensuite (`termine`), les liens `surlignes` clignotent. Un lien trop long est tracé en rouge et refusé (`onRefus`).
+ * ensuite (`termine`), le point de rupture des liens `surlignes` est entouré. Un lien trop long est tracé en rouge et refusé (`onRefus`).
  */
 export default function NiveauCanvas({ niveau, echelle, origine, espace, materiaux, liens, piece, resultat, termine, surlignes, onLien, onRefus, onSupprimer, onPieceFinie, onFin }) {
   const ref = useRef(null)

@@ -104,7 +104,7 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
   }
 
   if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine)
-  dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, origine, temps)
+  dessinerPointRupture(ctx, surlignes, noeuds, niveau, echelle, origine, temps)
   ctx.restore()
 }
 
@@ -134,27 +134,22 @@ function dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle, origine) {
   ctx.restore()
 }
 
-/** Halo rouge qui clignote (2 fois par seconde) sur les liens fragiles et leurs deux nœuds. */
-function dessinerSurlignage(ctx, surlignes, noeuds, niveau, echelle, origine, temps) {
-  if (surlignes.length === 0) return
+/** Point de rupture : un cercle rouge qui pulse autour du milieu de chaque lien cassé en premier. */
+function dessinerPointRupture(ctx, surlignes, noeuds, niveau, echelle, origine, temps) {
   ctx.save()
-  ctx.globalAlpha = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(temps * Math.PI * 4))
-  ctx.strokeStyle = '#ff1744'
-  ctx.lineCap = 'round'
+  const pulse = 0.5 + 0.5 * Math.sin(temps * Math.PI * 4)
   for (const s of surlignes) {
     const a = pixels(noeuds[s.noeudDepartId], niveau, echelle, origine)
     const b = pixels(noeuds[s.noeudArriveeId], niveau, echelle, origine)
-    ctx.lineWidth = largeurLien(echelle) + 10
+    const rayon = rayonNoeud(echelle) * 2 + 4 * pulse
     ctx.beginPath()
-    ctx.moveTo(a.x, a.y)
-    ctx.lineTo(b.x, b.y)
+    ctx.arc((a.x + b.x) / 2, (a.y + b.y) / 2, rayon, 0, Math.PI * 2)
+    ctx.strokeStyle = '#fff'
+    ctx.lineWidth = 7
     ctx.stroke()
-    ctx.lineWidth = 3
-    for (const p of [a, b]) {
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, rayonNoeud(echelle) + 6, 0, Math.PI * 2)
-      ctx.stroke()
-    }
+    ctx.strokeStyle = '#d50000'
+    ctx.lineWidth = 4
+    ctx.stroke()
   }
   ctx.restore()
 }
