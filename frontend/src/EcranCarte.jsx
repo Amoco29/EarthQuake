@@ -1,3 +1,4 @@
+import { EcranAvecDecor } from './Decor.jsx'
 import { estTutoriel, niveauOuvert } from './progression.js'
 
 const DECORS = { prairie: '#8fd18a', montagne: '#b8b8c8', ville: '#e0b878' }
@@ -14,7 +15,8 @@ export default function EcranCarte({ niveaux, scores, tutoVu, onTutoVu, onChoisi
     onChoisir(tutoriel.id)
   }
   return (
-    <main className="ecran-carte">
+    <EcranAvecDecor className="ecran-carte">
+    <div className="contenu-carte">
       <h1>EarthQuake Faker</h1>
       <p>Aide Félix Fixe Junior à construire des structures qui résistent aux séismes.</p>
       {tutoriel && !tutoVu && (
@@ -53,6 +55,7 @@ export default function EcranCarte({ niveaux, scores, tutoVu, onTutoVu, onChoisi
         })}
       </ol>
       {tutoriel && tutoVu && <button onClick={ouvrirTuto}>Revoir le tutoriel</button>}
-    </main>
+    </div>
+    </EcranAvecDecor>
   )
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { chargerMateriaux, chargerNiveaux } from './api.js'
+import EcranTitre from './EcranTitre.jsx'
 import EcranCarte from './EcranCarte.jsx'
 import EcranNiveau from './EcranNiveau.jsx'
 import { estTutoriel } from './progression.js'
@@ -10,6 +11,7 @@ function App() {
   const [erreur, setErreur] = useState(null)
   const [niveauOuvert, setNiveauOuvert] = useState(null) // null = on est sur la carte
   const [scores, setScores] = useState({}) // état du jeu en mémoire : perdu au rechargement de la page
+  const [titreVu, setTitreVu] = useState(false)
   const [tutoVu, setTutoVu] = useState(false) // proposition du tutoriel déjà traitée (en mémoire aussi)
 
   const charger = useCallback(() => {
@@ -41,6 +43,8 @@ function App() {
     )
   }
   if (!donnees) return <main>Chargement…</main>
+
+  if (!titreVu) return <EcranTitre onJouer={() => setTitreVu(true)} />
 
   if (niveauOuvert === null) {
     return (

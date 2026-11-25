@@ -105,12 +105,8 @@ export function cibleDePiece(px, py, niveau, echelle = PIXELS_PAR_METRE, rayon =
 export const RATIO_DECOR = 768 / 1376
 export const SOL_DECOR = 660 / 768
 
-/**
- * Calque de décor (pleine largeur de `espace`) décalé pour que le haut de l'herbe tombe sur le Y = 0 du canvas,
- * lui-même centré dans `espace`. Renvoie { hauteur, haut } en pixels.
- */
-export function positionDecor(espace, hauteurCanvas, marge = MARGE) {
-  const hauteur = espace.largeur * RATIO_DECOR
-  const sol = (espace.hauteur + hauteurCanvas) / 2 - marge
+/** Calque de décor (pleine largeur) décalé pour que le haut de l'herbe tombe à `sol` pixels du haut. Renvoie { hauteur, haut }. */
+export function positionDecor(largeur, sol) {
+  const hauteur = largeur * RATIO_DECOR
   return { hauteur, haut: sol - SOL_DECOR * hauteur }
 }

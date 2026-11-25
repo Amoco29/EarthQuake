@@ -3,7 +3,7 @@ import { chargerNiveau, simulerNiveau } from './api.js'
 import { conseilBudget, conseilsEchec, EXPLICATION_SOLIDITE, phraseDuPremierLienCasse, phraseMargeDeSecurite, premiersLiensCasses } from './bilan.js'
 import { ajouterLien, coutTotal, hauteurAtteinte, supprimerLien } from './construction.js'
 import MessageErreur from './MessageErreur.jsx'
-import { calculerEchelle, dimensionsCanvas, PIXELS_PAR_METRE } from './geometrie.js'
+import { calculerEchelle, dimensionsCanvas, MARGE, PIXELS_PAR_METRE } from './geometrie.js'
 import Decor from './Decor.jsx'
 import NiveauCanvas from './NiveauCanvas.jsx'
 import PanneauMateriaux from './PanneauMateriaux.jsx'
@@ -129,7 +129,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
         />
 
         <div className="zone-canvas" data-tuto="zone-construction" ref={setZone}>
-          <Decor espace={espace} hauteurCanvas={dimensionsCanvas(niveau, echelle).hauteur} secousse={Boolean(resultat) && !animationFinie} />
+          <Decor espace={espace} sol={(espace.hauteur + dimensionsCanvas(niveau, echelle).hauteur) / 2 - MARGE} secousse={Boolean(resultat) && !animationFinie} />
           <NiveauCanvas
             niveau={niveau}
             echelle={echelle}

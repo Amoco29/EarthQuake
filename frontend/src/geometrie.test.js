@@ -150,10 +150,9 @@ describe('cibleDePiece', () => {
 })
 
 describe('positionDecor', () => {
-  it("place le haut de l'herbe sur le Y = 0 du canvas centré", () => {
-    const espace = { largeur: 1376, hauteur: 800 }
-    const { hauteur, haut } = positionDecor(espace, 600, 30)
+  it("place le haut de l'herbe à la hauteur demandée", () => {
+    const { hauteur, haut } = positionDecor(1376, 500)
     expect(hauteur).toBeCloseTo(1376 * RATIO_DECOR)
-    expect(haut + SOL_DECOR * hauteur).toBeCloseTo((800 + 600) / 2 - 30)
+    expect(haut + SOL_DECOR * hauteur).toBeCloseTo(500)
   })
 })

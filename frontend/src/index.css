@@ -87,6 +87,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 /* Décor du niveau : derrière le canvas (transparent), images dans public/images/decor */
 .zone-canvas { position: relative; overflow: hidden; }
+.ecran-titre, .ecran-carte { position: relative; overflow: hidden; }
 .zone-canvas canvas { position: relative; }
 .decor { position: absolute; inset: 0; }
 .decor > div { position: absolute; left: 0; right: 0; background-size: 100% 100%; background-repeat: no-repeat; }
@@ -97,3 +98,16 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 @keyframes fumee { from { transform: translate(-6px, 4px); opacity: 0.85; } to { transform: translate(8px, -10px); opacity: 1; } }
 @keyframes secousse-decor { 25% { transform: translate(3px, 1px); } 75% { transform: translate(-3px, -1px); } }
 @media (prefers-reduced-motion: reduce) { .decor > div { animation: none !important; } }
+
+/* Écran titre : le titre tombe puis se pose, comme le sol qui tremble */
+.ecran-titre { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+.titre-jeu { position: relative; margin: 0; font-size: clamp(2rem, 8vw, 5rem); color: #ffa31a; text-align: center;
+  text-shadow: 0 0 0 #5a2d00, 3px 3px 0 #5a2d00, -3px 3px 0 #5a2d00, 3px -3px 0 #5a2d00, -3px -3px 0 #5a2d00, 0 8px 12px rgba(0,0,0,0.5);
+  transform: rotate(-3deg); animation: titre-tombe 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.bouton-jouer { position: relative; font-size: 1.4rem; padding: 12px 36px; border: 3px solid #5a2d00; border-radius: 10px; background: #ffd24d; color: #5a2d00; }
+.bouton-jouer:hover, .bouton-jouer:focus-visible { background: #ffe38a; outline: 3px solid #fff; }
+@keyframes titre-tombe { from { transform: translateY(-60vh) rotate(-3deg); opacity: 0; } to { transform: rotate(-3deg); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .titre-jeu { animation: none; } }
+
+/* Carte : contenu lisible sur le décor */
+.contenu-carte { position: relative; max-height: 100%; overflow-y: auto; box-sizing: border-box; background: rgba(255, 255, 255, 0.88); border-radius: 12px; padding: 12px 20px; }
