@@ -34,6 +34,20 @@ export function lienAutorise(departId, arriveeId, niveau, materiau = null) {
   return { ok: true, longueur, message: null }
 }
 
+/** Ids des nœuds qui ont au moins un voisin relié par un lien autorisé avec ce matériau (où l'on peut poser une extrémité). */
+export function noeudsCompatibles(niveau, materiau = null) {
+  const ids = new Set()
+  for (const a of niveau.noeuds) {
+    for (const b of niveau.noeuds) {
+      if (a.id < b.id && lienAutorise(a.id, b.id, niveau, materiau).ok) {
+        ids.add(a.id)
+        ids.add(b.id)
+      }
+    }
+  }
+  return ids
+}
+
 /**
  * Ajoute un lien ; sur une paire déjà reliée, remplace le matériau ; ignore une boucle.
  * Si `niveau` est fourni, refuse (sans rien changer) un lien trop long pour la grille ou pour `materiau`.

@@ -1,5 +1,5 @@
 import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
-import { cleLien, indexerNoeuds } from './construction.js'
+import { cleLien, indexerNoeuds, noeudsCompatibles } from './construction.js'
 import { dimensionsCanvas, metresVersPixels } from './geometrie.js'
 
 export const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
@@ -123,6 +123,18 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
       ctx.arc(x, y, rayonNoeud(echelle), 0, Math.PI * 2)
     }
     ctx.fill()
+  }
+
+  // Pièce en main : un anneau vert sur les nœuds où elle peut se poser
+  if (drag) {
+    ctx.strokeStyle = 'rgba(26, 156, 58, 0.7)'
+    ctx.lineWidth = 2
+    for (const id of noeudsCompatibles(niveau, materiaux[drag.materiauId])) {
+      const { x, y } = pixels(noeuds[id], niveau, echelle)
+      ctx.beginPath()
+      ctx.arc(x, y, rayonNoeud(echelle) + 5, 0, Math.PI * 2)
+      ctx.stroke()
+    }
   }
 
   if (drag) dessinerPiece(ctx, drag, noeuds, materiaux, niveau, echelle)

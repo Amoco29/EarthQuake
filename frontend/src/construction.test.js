@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ajouterLien, coutTotal, hauteurAtteinte, lienAutorise, limiteLien, supprimerLien } from './construction.js'
+import { ajouterLien, coutTotal, hauteurAtteinte, lienAutorise, limiteLien, noeudsCompatibles, supprimerLien } from './construction.js'
 
 // Ancrages 1 (0,0) et 2 (5,0) ; nœuds 3 (0,5), 4 (5,5), 5 (0,10) ; 6 (2,2) isolé.
 const niveau = {
@@ -120,5 +120,23 @@ describe('longueur maximale du matériau', () => {
     const liens = []
     expect(ajouterLien(liens, 1, 3, 'BETON', niveauGrille, beton)).toBe(liens)
     expect(ajouterLien(liens, 1, 3, 'BOIS', niveauGrille, bois)).toHaveLength(1)
+  })
+})
+
+describe('noeudsCompatibles', () => {
+  const niveau = {
+    longueurMaxLien: 3.54,
+    noeuds: [
+      { id: 1, posX: 0, posY: 0 },
+      { id: 2, posX: 2.5, posY: 0 },
+      { id: 3, posX: 5, posY: 0 },
+      { id: 4, posX: 5, posY: 10 }, // isolé
+    ],
+  }
+  it('exclut les nœuds sans voisin atteignable', () => {
+    expect([...noeudsCompatibles(niveau)].sort()).toEqual([1, 2, 3])
+  })
+  it('tient compte de la longueur max du matériau', () => {
+    expect(noeudsCompatibles(niveau, { nom: 'Court', longueurMax: 1 }).size).toBe(0)
   })
 })

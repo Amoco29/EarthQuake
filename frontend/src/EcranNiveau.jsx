@@ -16,6 +16,7 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
   const [niveau, setNiveau] = useState(null)
   const [erreur, setErreur] = useState(null)
   const [liens, setLiens] = useState([])
+  const [passe, setPasse] = useState([]) // états précédents de `liens`, pour annuler
   const [piece, setPiece] = useState(null) // pièce tenue : { materiauId, clientX, clientY }
   const [resultat, setResultat] = useState(null)
   const [animationFinie, setAnimationFinie] = useState(false)
@@ -74,9 +75,35 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
     }
   }
 
+  // Toute modification des liens passe par ici : elle garde l'état précédent pour l'annulation.
+  function modifierLiens(f) {
+    setPasse((p) => [...p, liens])
+    setLiens(f(liens))
+  }
+
+  function annuler() {
+    if (passe.length === 0) return
+    setLiens(passe[passe.length - 1])
+    setPasse(passe.slice(0, -1))
+  }
+
+  // Ctrl+Z annule le dernier changement (hors séisme)
+  useEffect(() => {
+    if (resultat) return undefined
+    const touche = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        annuler()
+      }
+    }
+    window.addEventListener('keydown', touche)
+    return () => window.removeEventListener('keydown', touche)
+  }) // sans dépendances : `annuler` voit toujours l'état courant
+
   function revoirTuto() {
     setTuto(etatInitial)
     setLiens([])
+    setPasse([])
     recommencer()
   }
 
@@ -142,13 +169,13 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
             onLien={(a, b, materiauId) => {
               setAvertissement(null)
               evenement('lienPose')
-              setLiens((l) => ajouterLien(l, a, b, materiauId, niveau, parId[materiauId]))
+              modifierLiens((l) => ajouterLien(l, a, b, materiauId, niveau, parId[materiauId]))
             }}
             onPieceFinie={() => setPiece(null)}
             onRefus={setAvertissement}
             onSupprimer={(a, b) => {
               setAvertissement(null)
-              setLiens((l) => supprimerLien(l, a, b))
+              modifierLiens((l) => supprimerLien(l, a, b))
             }}
             onFin={finAnimation}
           />
@@ -169,7 +196,10 @@ export default function EcranNiveau({ id, materiaux, suivantId, onRetour, onVict
               <button data-tuto="bouton-seisme" onClick={simuler} disabled={enCours || liens.length === 0}>
                 Lancer le séisme
               </button>
-              <button onClick={() => setLiens([])} disabled={liens.length === 0}>
+              <button onClick={annuler} disabled={passe.length === 0} title="Ctrl+Z">
+                Annuler
+              </button>
+              <button onClick={() => modifierLiens(() => [])} disabled={liens.length === 0}>
                 Tout effacer
               </button>
             </div>
