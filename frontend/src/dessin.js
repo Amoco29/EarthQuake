@@ -1,6 +1,7 @@
 import { couleurStress, etatRupture, secousse, tauxAffiche } from './animation.js'
 import { cleLien, indexerNoeuds, noeudsCompatibles } from './construction.js'
 import { texturer } from './dessinMateriaux.js'
+import { dessinerDalle, dessinerEchafaudage, dessinerNoeud } from './dessinZone.js'
 import { metresVersPixels } from './geometrie.js'
 
 export const POLICE = "12px 'Pokemon', 'Press Start 2P', monospace"
@@ -52,13 +53,8 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
     ctx.translate(dx, dy)
   }
 
-  // Zone de construction
-  const coin = metresVersPixels(0, niveau.hauteurZone, niveau, echelle, origine)
-  const oppose = metresVersPixels(niveau.largeurZone, 0, niveau, echelle, origine)
-  ctx.fillStyle = 'rgba(255,255,255,0.55)' // voile : le décor reste visible, la structure lisible
-  ctx.fillRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)
-  ctx.strokeStyle = '#888'
-  ctx.strokeRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)
+  dessinerDalle(ctx, niveau, echelle, origine)
+  dessinerEchafaudage(ctx, niveau, echelle, origine)
 
   // Ligne de hauteur à atteindre
   const gauche = metresVersPixels(0, niveau.hauteurMinRequise, niveau, echelle, origine)
@@ -89,21 +85,10 @@ export function dessinerScene(ctx, { niveau, echelle, origine, espace, materiaux
     }
   }
 
-  // Nœuds : cercle, ou triangle pour un ancrage au sol
+  // Nœuds : plaque et boulon, platine pour un ancrage au sol
   for (const noeud of niveau.noeuds) {
     const { x, y } = pixels(noeud, niveau, echelle, origine)
-    ctx.fillStyle = noeud.estAncrageSol ? '#444' : '#1b6ec2'
-    ctx.beginPath()
-    if (noeud.estAncrageSol) {
-      const r = rayonNoeud(echelle) * 1.3
-      ctx.moveTo(x, y - r)
-      ctx.lineTo(x - r, y + r * 0.8)
-      ctx.lineTo(x + r, y + r * 0.8)
-      ctx.closePath()
-    } else {
-      ctx.arc(x, y, rayonNoeud(echelle), 0, Math.PI * 2)
-    }
-    ctx.fill()
+    dessinerNoeud(ctx, x, y, rayonNoeud(echelle), noeud.estAncrageSol)
   }
 
   // Pièce en main : un anneau vert sur les nœuds où elle peut se poser
