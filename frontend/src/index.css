@@ -84,3 +84,16 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 .proposition-tuto { background: #fffbe6; border: 2px solid #e0a800; border-radius: 8px; padding: 8px 14px; margin: 12px 0; }
 .proposition-tuto p { margin: 4px 0; font-size: 0.9375rem; }
+
+/* Décor du niveau : derrière le canvas (transparent), images dans public/images/decor */
+.zone-canvas { position: relative; overflow: hidden; }
+.zone-canvas canvas { position: relative; }
+.decor { position: absolute; inset: 0; }
+.decor > div { position: absolute; left: 0; right: 0; background-size: 100% 100%; background-repeat: no-repeat; }
+.decor-ciel { background-image: url('/images/decor/sol-ciel.png'); }
+.decor-fumee { background-image: url('/images/decor/fumee.png'); animation: fumee 9s ease-in-out infinite alternate; }
+.decor-immeubles { background-image: url('/images/decor/fond-batiment.png'); }
+.decor > .secousse { animation: secousse-decor 0.12s linear infinite; }
+@keyframes fumee { from { transform: translate(-6px, 4px); opacity: 0.85; } to { transform: translate(8px, -10px); opacity: 1; } }
+@keyframes secousse-decor { 25% { transform: translate(3px, 1px); } 75% { transform: translate(-3px, -1px); } }
+@media (prefers-reduced-motion: reduce) { .decor > div { animation: none !important; } }

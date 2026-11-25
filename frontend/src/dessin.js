@@ -53,7 +53,7 @@ export function dessinerScene(ctx, { niveau, echelle, materiaux, liens, drag, re
   // Zone de construction
   const coin = metresVersPixels(0, niveau.hauteurZone, niveau, echelle)
   const oppose = metresVersPixels(niveau.largeurZone, 0, niveau, echelle)
-  ctx.fillStyle = '#eef6ff'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)' // voile : le décor reste visible, la structure lisible
   ctx.fillRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)
   ctx.strokeStyle = '#888'
   ctx.strokeRect(coin.x, coin.y, oppose.x - coin.x, oppose.y - coin.y)

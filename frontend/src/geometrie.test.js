@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculerEchelle, cibleDePiece, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres } from './geometrie.js'
+import { calculerEchelle, cibleDePiece, dimensionsCanvas, ECHELLE_MAX, lienSous, metresVersPixels, noeudSous, pixelsVersMetres, positionDecor, RATIO_DECOR, SOL_DECOR } from './geometrie.js'
 
 const niveau = { largeurZone: 5, hauteurZone: 10 }
 
@@ -146,5 +146,14 @@ describe('cibleDePiece', () => {
     const versBasDroite = metresVersPixels(1.5, 1, carre, 10, 30) // sur la diagonale 2-3
     expect(cibleDePiece(versBasGauche.x, versBasGauche.y, carre, 10)).toEqual({ departId: 1, arriveeId: 4 })
     expect(cibleDePiece(versBasDroite.x, versBasDroite.y, carre, 10)).toEqual({ departId: 2, arriveeId: 3 })
+  })
+})
+
+describe('positionDecor', () => {
+  it("place le haut de l'herbe sur le Y = 0 du canvas centré", () => {
+    const espace = { largeur: 1376, hauteur: 800 }
+    const { hauteur, haut } = positionDecor(espace, 600, 30)
+    expect(hauteur).toBeCloseTo(1376 * RATIO_DECOR)
+    expect(haut + SOL_DECOR * hauteur).toBeCloseTo((800 + 600) / 2 - 30)
   })
 })
